@@ -8,6 +8,7 @@ pub type BodyId = String;
 
 /// Body classification for rendering and HUD (Phase 2+).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[allow(clippy::enum_variant_names)]
 #[serde(rename_all = "snake_case")]
 pub enum BodyClass {
     Star,
@@ -31,9 +32,9 @@ pub struct Body {
     pub radius_m: f64,
     pub position_m: DVec3,
     pub velocity_mps: DVec3,
-    /// Body class for colors and HUD (Phase 2+).
-    #[allow(dead_code)]
     pub class: BodyClass,
+    /// Optional RGB from scenario (`#rrggbb`).
+    pub color_rgb: Option<[u8; 3]>,
 }
 
 impl Body {

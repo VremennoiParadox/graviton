@@ -26,6 +26,9 @@ pub enum GravitonError {
         source: std::io::Error,
     },
 
+    #[error("I/O error: {0}")]
+    StdIo(#[from] std::io::Error),
+
     #[error("{0}")]
     Other(String),
 }
@@ -146,6 +149,7 @@ mod compile_tests {
         let _ = HorizonsError::Http("timeout".into());
         let _ = HorizonsError::MissingVectorTable;
         let _ = HorizonsError::UnknownUnits;
+        let _ = GravitonError::StdIo(std::io::Error::from(std::io::ErrorKind::NotFound));
         let _ = RenderError::TerminalTooSmall {
             min_width: 80,
             min_height: 24,

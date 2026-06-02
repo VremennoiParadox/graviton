@@ -12,7 +12,7 @@ pub struct SystemState {
 }
 
 /// Integrator and force-model parameters.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct PhysicsSettings {
     pub dt_s: f64,
     pub softening_m: f64,

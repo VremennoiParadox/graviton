@@ -99,6 +99,7 @@ mod tests {
                 position_m: DVec3::ZERO,
                 velocity_mps: DVec3::new(0.0, v_central, 0.0),
                 class: BodyClass::Planet,
+                color_rgb: None,
             },
             Body {
                 id: "orbit".into(),
@@ -108,6 +109,7 @@ mod tests {
                 position_m: DVec3::new(r, 0.0, 0.0),
                 velocity_mps: DVec3::new(0.0, v_orbit, 0.0),
                 class: BodyClass::Moon,
+                color_rgb: None,
             },
         ];
 

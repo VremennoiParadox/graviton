@@ -188,8 +188,8 @@ fn run_simulation(args: RunArgs) -> Result<()> {
         return Ok(());
     }
 
-    let _app = App::new();
-    Err(not_implemented("interactive TUI", "Phase 2"))
+    let scenario_path = args.scenario.clone();
+    App::run_interactive(loaded, scenario_path, args)
 }
 
 fn fetch_horizons(args: FetchArgs) -> Result<()> {

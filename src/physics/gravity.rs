@@ -43,6 +43,7 @@ mod tests {
             position_m: pos,
             velocity_mps: DVec3::ZERO,
             class: BodyClass::Planet,
+            color_rgb: None,
         }
     }
 

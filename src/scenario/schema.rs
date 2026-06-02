@@ -1,5 +1,6 @@
 //! Serde types for scenario TOML files.
-#![allow(dead_code)] // render/color fields used in Phase 2+
+
+#![allow(dead_code)]
 
 use serde::Deserialize;
 

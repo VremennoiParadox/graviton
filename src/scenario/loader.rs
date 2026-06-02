@@ -10,17 +10,26 @@ use crate::physics::body::{Body, BodyClass};
 use crate::physics::constants::{AU, DAY, M_EARTH, M_SUN};
 use crate::physics::system::{PhysicsSettings, SystemState};
 use crate::physics::units::days_to_seconds;
+use crate::render::colors::parse_hex_color;
 use crate::scenario::schema::ScenarioFile;
 use crate::scenario::validate::validate;
+
+/// Rendering parameters from scenario TOML.
+#[derive(Debug, Clone)]
+pub struct RenderConfig {
+    pub meters_per_cell: f64,
+    pub trail_capacity: usize,
+    pub trail_sample_every: u64,
+    pub follow_center_of_mass: bool,
+}
 
 /// Loaded scenario with simulation state and metadata.
 pub struct LoadedScenario {
     pub system: SystemState,
+    pub render: RenderConfig,
     #[allow(dead_code)]
-    /// Scenario description from TOML (HUD/docs in later phases).
     pub description: Option<String>,
     #[allow(dead_code)]
-    /// Scenario author from TOML.
     pub author: Option<String>,
 }
 
@@ -47,9 +56,17 @@ pub fn load(path: &Path) -> Result<LoadedScenario> {
                 position_m: DVec3::from_array(spec.position) * distance_scale,
                 velocity_mps: DVec3::from_array(spec.velocity) * velocity_scale,
                 class: parse_class(&spec.class)?,
+                color_rgb: spec.color.as_deref().and_then(parse_hex_color),
             })
         })
         .collect::<Result<Vec<_>>>()?;
+
+    let render = RenderConfig {
+        meters_per_cell: raw.render.meters_per_cell.unwrap_or(10_000_000.0),
+        trail_capacity: raw.render.trail_points.unwrap_or(1024) as usize,
+        trail_sample_every: 4,
+        follow_center_of_mass: raw.render.follow_center_of_mass.unwrap_or(false),
+    };
 
     let dt_s = dt_seconds(&raw, time_scale)?;
     let settings = PhysicsSettings {
@@ -63,6 +80,7 @@ pub fn load(path: &Path) -> Result<LoadedScenario> {
 
     Ok(LoadedScenario {
         system,
+        render,
         description: raw.description,
         author: raw.author,
     })
