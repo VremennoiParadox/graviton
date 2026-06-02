@@ -1,4 +1,4 @@
-//! graviton — terminal N-body gravitational simulator (binary entry point).
+//! orrery-tui — terminal N-body gravitational simulator (binary entry point).
 
 mod app;
 mod bench;
@@ -17,7 +17,7 @@ use clap::Parser;
 
 fn main() -> anyhow::Result<()> {
     let cli = cli::Cli::parse();
-    cli::run(cli).context("graviton failed")
+    cli::run(cli).context("orrery-tui failed")
 }
 
 #[cfg(test)]
@@ -28,14 +28,14 @@ mod tests {
 
     #[test]
     fn cli_parses_without_subcommand_errors() {
-        let cli = Cli::try_parse_from(["graviton", "list-scenarios"]).unwrap();
+        let cli = Cli::try_parse_from(["orrery-tui", "list-scenarios"]).unwrap();
         assert!(matches!(cli.command, Commands::ListScenarios));
     }
 
     #[test]
     fn run_subcommand_parses_flags() {
         let cli = Cli::try_parse_from([
-            "graviton",
+            "orrery-tui",
             "run",
             "scenarios/earth-moon.toml",
             "--headless",
@@ -57,7 +57,7 @@ mod tests {
     #[test]
     fn fetch_subcommand_parses_date() {
         let cli =
-            Cli::try_parse_from(["graviton", "fetch", "solar-system", "--date", "2026-06-01"])
+            Cli::try_parse_from(["orrery-tui", "fetch", "solar-system", "--date", "2026-06-01"])
                 .unwrap();
         assert!(matches!(cli.command, Commands::Fetch(_)));
     }

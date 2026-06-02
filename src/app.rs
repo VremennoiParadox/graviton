@@ -16,7 +16,7 @@ use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
 
 use crate::cli::RunArgs;
-use crate::error::{GravitonError, Result};
+use crate::error::{OrreryTuiError, Result};
 use crate::input::keymap::{map_key, AppCommand};
 use crate::input::mouse::{map_mouse, MouseCommand};
 use crate::physics::diagnostics::{compute, Diagnostics};
@@ -122,7 +122,7 @@ impl App {
         let mut system = loaded.system;
         if let Some(dt) = args.dt {
             if dt <= 0.0 || !dt.is_finite() {
-                return Err(GravitonError::Scenario(
+                return Err(OrreryTuiError::Scenario(
                     crate::error::ScenarioError::InvalidTimeStep,
                 ));
             }

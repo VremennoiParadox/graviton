@@ -1,7 +1,7 @@
 schema_version = 1
 name = "Earth-Moon"
 description = "Earth and Moon with mutual circular-orbit initial conditions (SI units)."
-author = "graviton"
+author = "orrery-tui"
 
 [units]
 distance = "m"

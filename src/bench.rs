@@ -1,4 +1,4 @@
-//! Built-in physics benchmarks (`graviton bench`).
+//! Built-in physics benchmarks (`orrery-tui bench`).
 
 use std::time::Instant;
 
@@ -13,7 +13,7 @@ use crate::physics::system::PhysicsSettings;
 /// Run acceleration benchmarks and print timings to stdout.
 pub fn run(filter: Option<&str>) -> Result<()> {
     let sizes = [10usize, 100, 500, 1000];
-    println!("graviton acceleration benchmarks (single-threaded, best of 3)\n");
+    println!("orrery-tui acceleration benchmarks (single-threaded, best of 3)\n");
 
     for &n in &sizes {
         if let Some(f) = filter {

@@ -1,6 +1,6 @@
 # Physics model
 
-graviton simulates Newtonian gravitation in **3D** with a fixed time step. Internal state uses SI units everywhere.
+orrery-tui simulates Newtonian gravitation in **3D** with a fixed time step. Internal state uses SI units everywhere.
 
 ## Gravity
 

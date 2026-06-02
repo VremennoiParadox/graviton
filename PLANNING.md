@@ -1,23 +1,23 @@
-# graviton Planning Document
+# orrery-tui Planning Document
 
 ## 1. Project Overview
 
 ### Elevator Pitch
 
-`graviton` is a terminal-based N-body gravitational simulator written in Rust that turns orbital mechanics into an interactive, visually rich scientific instrument.
+`orrery-tui` is a terminal-based N-body gravitational simulator written in Rust that turns orbital mechanics into an interactive, visually rich scientific instrument.
 It lets users load real Solar System state vectors from NASA JPL HORIZONS, simulate gravitational interactions with a custom RK4 integrator, and inspect trajectories, energy drift, field intensity, and orbital properties directly inside the terminal.
 For a university admissions reader, the project demonstrates applied physics, numerical methods, systems programming, data visualization, and open-source engineering in one coherent artifact.
 
 ### Name Recommendation
 
-Keep the name `graviton`.
+Keep the name `orrery-tui`.
 
 Reason:
 
 - It is short, memorable, and clearly related to gravity.
-- It works well as a CLI command: `graviton run scenarios/solar-system.toml`.
+- It works well as a CLI command: `orrery-tui run scenarios/solar-system.toml`.
 - It feels serious enough for a scientific portfolio project.
-- It leaves room for future subcommands such as `graviton fetch`, `graviton validate`, and `graviton bench`.
+- It leaves room for future subcommands such as `orrery-tui fetch`, `orrery-tui validate`, and `orrery-tui bench`.
 
 Alternative names considered:
 
@@ -28,7 +28,7 @@ Alternative names considered:
 
 Decision:
 
-- Use `graviton` for the repository, binary, and crate unless the crates.io name is unavailable.
+- Use `orrery-tui` for the repository, binary, and crate unless the crates.io name is unavailable.
 
 ### Key Design Principles
 
@@ -59,7 +59,7 @@ Rust is the right language for this project because:
 The finished application should feel like this:
 
 ```text
-$ graviton run scenarios/solar-system.toml
+$ orrery-tui run scenarios/solar-system.toml
 ```
 
 Then the user sees:
@@ -123,12 +123,12 @@ The first release should clearly label:
 
 ### High-Level Shape
 
-`graviton` should be one Rust workspace with one main binary crate at first.
+`orrery-tui` should be one Rust workspace with one main binary crate at first.
 
 Start simple:
 
 ```text
-graviton/
+orrery-tui/
   Cargo.toml
   README.md
   PLANNING.md
@@ -149,10 +149,10 @@ Possible later split:
 
 ```text
 crates/
-  graviton-core/
-  graviton-horizons/
-  graviton-tui/
-  graviton-cli/
+  orrery-tui-core/
+  orrery-tui-horizons/
+  orrery-tui-tui/
+  orrery-tui-cli/
 ```
 
 Only do this after Phase 5 if the boundaries are stable.
@@ -253,7 +253,7 @@ src/
 
 `cli.rs`:
 
-- Defines `graviton run`, `graviton fetch`, `graviton validate`, and `graviton bench`.
+- Defines `orrery-tui run`, `orrery-tui fetch`, `orrery-tui validate`, and `orrery-tui bench`.
 - Owns `clap` structs.
 - Does not contain simulation logic.
 
@@ -1044,7 +1044,7 @@ It can return:
 - Orbital elements.
 - Physical data.
 
-For `graviton`, use vector tables.
+For `orrery-tui`, use vector tables.
 
 Reason:
 
@@ -1187,7 +1187,7 @@ Important:
 Create a command:
 
 ```text
-graviton fetch solar-system --date 2026-06-01
+orrery-tui fetch solar-system --date 2026-06-01
 ```
 
 It should:
@@ -1314,13 +1314,13 @@ For unknown HORIZONS bodies:
 Use the OS cache directory:
 
 ```text
-~/.cache/graviton/horizons/
+~/.cache/orrery-tui/horizons/
 ```
 
 With `directories` crate:
 
 ```rust
-ProjectDirs::from("dev", "graviton", "graviton")
+ProjectDirs::from("dev", "orrery-tui", "orrery-tui")
 ```
 
 Cache raw responses:
@@ -1424,7 +1424,7 @@ User-facing error example:
 ```text
 Could not fetch Earth (399) from HORIZONS.
 Reason: response did not contain a vector table between $$SOE and $$EOE.
-Try: graviton fetch solar-system --date 2026-06-01 --verbose
+Try: orrery-tui fetch solar-system --date 2026-06-01 --verbose
 ```
 
 ## 5. Rendering Design
@@ -1865,7 +1865,7 @@ HUD layout:
 
 ```text
 +------------------------------------------------------+
-| graviton | paused | warp 24x | dt 3600s | RK4        |
+| orrery-tui | paused | warp 24x | dt 3600s | RK4        |
 +---------------------------+--------------------------+
 | simulation viewport       | selected body            |
 |                           | name: Earth              |
@@ -2001,7 +2001,7 @@ Top-level:
 schema_version = 1
 name = "Earth-Moon"
 description = "A simple Earth-Moon system."
-author = "graviton team"
+author = "orrery-tui team"
 
 [units]
 distance = "m"
@@ -2067,7 +2067,7 @@ Use normalized units in the scenario file, then convert to SI-like internal unit
 schema_version = 1
 name = "Figure-8 Three-Body"
 description = "A classic equal-mass three-body periodic orbit."
-author = "graviton team"
+author = "orrery-tui team"
 
 [units]
 distance = "custom"
@@ -2280,7 +2280,7 @@ Invalid scenario:
 - Add `scenarios/` directory.
 - Add `cargo fmt` and `cargo clippy` checks.
 - Add first smoke test.
-- Add `graviton --help`.
+- Add `orrery-tui --help`.
 
 #### Files and Modules Created
 
@@ -2313,7 +2313,7 @@ scenarios/.gitkeep
 - `cargo check` passes.
 - `cargo fmt --check` passes.
 - `cargo clippy --all-targets -- -D warnings` passes.
-- `graviton --help` prints useful commands.
+- `orrery-tui --help` prints useful commands.
 
 #### Done Looks Like
 
@@ -2380,7 +2380,7 @@ Running a non-interactive command can simulate Earth-Moon for a fixed number of 
 Example:
 
 ```text
-graviton run scenarios/earth-moon.toml --headless --steps 1000
+orrery-tui run scenarios/earth-moon.toml --headless --steps 1000
 ```
 
 ### Phase 2 – Terminal Renderer & Basic Interaction (Weeks 2–3)
@@ -2429,7 +2429,7 @@ src/time/scheduler.rs
 
 #### Exit Criteria
 
-- `graviton run scenarios/earth-moon.toml` opens a TUI.
+- `orrery-tui run scenarios/earth-moon.toml` opens a TUI.
 - User can pause.
 - User can zoom.
 - User can pan.
@@ -2458,7 +2458,7 @@ The Earth-Moon scenario is visually understandable in the terminal and can be co
 - Implement vector table parser.
 - Implement unit detection.
 - Implement cache directory handling.
-- Implement `graviton fetch`.
+- Implement `orrery-tui fetch`.
 - Implement body ID mapping.
 - Add local mass/radius constants.
 - Generate `scenarios/solar-system.toml`.
@@ -2484,7 +2484,7 @@ tests/horizons_parser.rs
 
 #### Exit Criteria
 
-- `graviton fetch solar-system --date YYYY-MM-DD` works.
+- `orrery-tui fetch solar-system --date YYYY-MM-DD` works.
 - Raw HORIZONS response is cached.
 - Parsed scenario is cached or written.
 - App can run from cached data without network.
@@ -2701,26 +2701,26 @@ crates.io version after publish
 Source install:
 
 ```text
-git clone https://github.com/<user>/graviton
-cd graviton
+git clone https://github.com/<user>/orrery-tui
+cd orrery-tui
 cargo run --release -- run scenarios/earth-moon.toml
 ```
 
 Future crates.io install:
 
 ```text
-cargo install graviton
-graviton run scenarios/solar-system.toml
+cargo install orrery-tui
+orrery-tui run scenarios/solar-system.toml
 ```
 
 ### Usage Examples
 
 ```text
-graviton run scenarios/earth-moon.toml
-graviton run scenarios/figure-eight.toml
-graviton fetch solar-system --date 2026-06-01
-graviton validate scenarios/solar-system.toml
-graviton bench
+orrery-tui run scenarios/earth-moon.toml
+orrery-tui run scenarios/figure-eight.toml
+orrery-tui fetch solar-system --date 2026-06-01
+orrery-tui validate scenarios/solar-system.toml
+orrery-tui bench
 ```
 
 ### Scenario Documentation
@@ -2779,7 +2779,7 @@ Include:
 For `v0.1.0`, publish only one crate if possible:
 
 ```text
-graviton
+orrery-tui
 ```
 
 Do not publish internal crates yet.
@@ -2793,9 +2793,9 @@ Reason:
 Possible future crates:
 
 ```text
-graviton-core
-graviton-horizons
-graviton-tui
+orrery-tui-core
+orrery-tui-horizons
+orrery-tui-tui
 ```
 
 Publish future crates only if external users need them.
@@ -3132,7 +3132,7 @@ Test:
 - Validate no NaN positions.
 - Validate no infinite velocities.
 - Validate CLI help.
-- Validate `graviton validate`.
+- Validate `orrery-tui validate`.
 
 ### Property Tests
 
@@ -3210,7 +3210,7 @@ runtime input > CLI flags > user config > scenario defaults
 Possible user config path:
 
 ```text
-~/.config/graviton/config.toml
+~/.config/orrery-tui/config.toml
 ```
 
 Example:
@@ -3235,11 +3235,11 @@ Do not implement global config until after scenario config works.
 Commands:
 
 ```text
-graviton run <scenario>
-graviton fetch solar-system --date <date>
-graviton validate <scenario>
-graviton list-scenarios
-graviton bench
+orrery-tui run <scenario>
+orrery-tui fetch solar-system --date <date>
+orrery-tui validate <scenario>
+orrery-tui list-scenarios
+orrery-tui bench
 ```
 
 `run` flags:
@@ -3268,7 +3268,7 @@ graviton bench
 `validate`:
 
 ```text
-graviton validate scenarios/*.toml
+orrery-tui validate scenarios/*.toml
 ```
 
 ## Documentation Standards

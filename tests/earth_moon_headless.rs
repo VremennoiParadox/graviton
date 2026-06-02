@@ -9,7 +9,7 @@ fn earth_moon_headless_produces_diagnostics() {
         .join("scenarios")
         .join("earth-moon.toml");
 
-    let output = Command::new(env!("CARGO_BIN_EXE_graviton"))
+    let output = Command::new(env!("CARGO_BIN_EXE_orrery-tui"))
         .args([
             "run",
             scenario.to_str().unwrap(),
@@ -18,7 +18,7 @@ fn earth_moon_headless_produces_diagnostics() {
             "100",
         ])
         .output()
-        .expect("failed to run graviton");
+        .expect("failed to run orrery-tui");
 
     assert!(
         output.status.success(),

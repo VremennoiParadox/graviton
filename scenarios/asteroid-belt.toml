@@ -1,7 +1,7 @@
 schema_version = 1
 name = "Asteroid Belt (procedural)"
 description = "Sun plus a pseudo-random main-belt for Barnes–Hut stress tests."
-author = "graviton"
+author = "orrery-tui"
 
 [units]
 distance = "au"

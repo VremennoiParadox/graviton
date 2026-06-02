@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Record graviton demo assets per PLANNING.md (VHS → GIF, optional asciinema).
+# Record orrery-tui demo assets per PLANNING.md (VHS → GIF, optional asciinema).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

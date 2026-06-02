@@ -84,7 +84,7 @@ fn render_status_bar(frame: &mut ratatui::Frame<'_>, app: &App, area: Rect) {
         "no heatmap"
     };
     let line = Line::from(vec![
-        Span::styled("graviton", Style::default().add_modifier(Modifier::BOLD)),
+        Span::styled("orrery-tui", Style::default().add_modifier(Modifier::BOLD)),
         Span::raw(" | "),
         Span::raw(scenario),
         Span::raw(" | "),
@@ -297,7 +297,7 @@ fn estimate_orbital_period_s(app: &App, body_idx: usize) -> Option<f64> {
 
 pub fn render_help(frame: &mut ratatui::Frame<'_>, area: Rect) {
     let text = vec![
-        Line::from("graviton controls (Phase 4)"),
+        Line::from("orrery-tui controls (Phase 4)"),
         Line::from(""),
         Line::from("q/Esc  quit    Space  pause    r  reset    Shift+R  reload"),
         Line::from("+/-  zoom    0  reset zoom    arrows/hjkl  pan"),

@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Something broke or looks wrong in graviton
+about: Something broke or looks wrong in orrery-tui
 title: "[bug] "
 labels: bug
 ---
@@ -26,7 +26,7 @@ Describe what you expected vs what you saw.
 - OS:
 - Terminal: (e.g. Kitty, Alacritty)
 - Rust version: (`rustc -V`)
-- graviton version or commit:
+- orrery-tui version or commit:
 
 ## Logs / screenshots
 

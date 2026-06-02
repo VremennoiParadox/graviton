@@ -1,6 +1,6 @@
 # Scenario files
 
-graviton loads Newtonian N-body systems from TOML files in `scenarios/`. All internal physics uses **SI units** (meters, seconds, kilograms); the `[units]` section controls how values in the file are interpreted.
+orrery-tui loads Newtonian N-body systems from TOML files in `scenarios/`. All internal physics uses **SI units** (meters, seconds, kilograms); the `[units]` section controls how values in the file are interpreted.
 
 ## Minimal example
 
@@ -107,7 +107,7 @@ enabled = false
 theta = 0.7             # opening angle; smaller = more accurate
 ```
 
-CLI override: `graviton run … --barnes-hut --theta 0.5` enables Barnes–Hut even if the file has it off.
+CLI override: `orrery-tui run … --barnes-hut --theta 0.5` enables Barnes–Hut even if the file has it off.
 
 ## Render section
 
@@ -157,7 +157,7 @@ cargo run -- list-scenarios
 ## Sharing custom scenarios
 
 1. Keep `schema_version = 1`.
-2. Run `graviton validate your.toml`.
+2. Run `orrery-tui validate your.toml`.
 3. Prefer SI or `au`/`day` for astronomical scales.
 4. Document assumptions in `description`.
-5. Do not commit large binary caches; HORIZONS raw JSON belongs in `~/.cache/graviton/`.
+5. Do not commit large binary caches; HORIZONS raw JSON belongs in `~/.cache/orrery-tui/`.

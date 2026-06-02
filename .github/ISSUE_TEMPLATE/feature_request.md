@@ -1,13 +1,13 @@
 ---
 name: Feature request
-about: Suggest an idea for graviton
+about: Suggest an idea for orrery-tui
 title: "[feature] "
 labels: enhancement
 ---
 
 ## Problem
 
-What are you trying to do that graviton does not support well today?
+What are you trying to do that orrery-tui does not support well today?
 
 ## Proposed solution
 

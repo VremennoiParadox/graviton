@@ -1,9 +1,9 @@
 //! Compare short-term energy drift: direct vs Barnes–Hut on Earth–Moon.
 
-use graviton::physics::diagnostics::compute;
-use graviton::physics::integrator::{Integrator, Rk4Integrator};
-use graviton::physics::system::SystemState;
-use graviton::scenario::load;
+use orrery_tui::physics::diagnostics::compute;
+use orrery_tui::physics::integrator::{Integrator, Rk4Integrator};
+use orrery_tui::physics::system::SystemState;
+use orrery_tui::scenario::load;
 
 #[test]
 fn barnes_hut_energy_drift_close_to_direct_on_earth_moon() {

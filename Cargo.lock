@@ -573,30 +573,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "graviton"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "criterion",
- "crossterm",
- "directories",
- "glam",
- "insta",
- "ordered-float",
- "proptest",
- "ratatui",
- "reqwest",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
- "tokio",
- "toml",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "half"
 version = "2.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1108,6 +1084,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7bb71e1b3fa6ca1c61f383464aaf2bb0e2f8e772a1f01d486832464de363b951"
 dependencies = [
  "num-traits",
+]
+
+[[package]]
+name = "orrery-tui"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "criterion",
+ "crossterm",
+ "directories",
+ "glam",
+ "insta",
+ "ordered-float",
+ "proptest",
+ "ratatui",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+ "tokio",
+ "toml",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]

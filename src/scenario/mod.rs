@@ -8,7 +8,7 @@ pub mod validate;
 
 use std::path::{Path, PathBuf};
 
-use crate::error::{GravitonError, Result};
+use crate::error::{OrreryTuiError, Result};
 
 /// Discover `.toml` scenario files in a directory (sorted by path).
 pub fn discover_scenarios(dir: &Path) -> Result<Vec<PathBuf>> {
@@ -16,11 +16,11 @@ pub fn discover_scenarios(dir: &Path) -> Result<Vec<PathBuf>> {
         return Ok(Vec::new());
     }
     let mut paths = Vec::new();
-    for entry in std::fs::read_dir(dir).map_err(|e| GravitonError::Io {
+    for entry in std::fs::read_dir(dir).map_err(|e| OrreryTuiError::Io {
         path: dir.to_path_buf(),
         source: e,
     })? {
-        let entry = entry.map_err(|e| GravitonError::Io {
+        let entry = entry.map_err(|e| OrreryTuiError::Io {
             path: dir.to_path_buf(),
             source: e,
         })?;

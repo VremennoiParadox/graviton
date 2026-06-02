@@ -1,12 +1,12 @@
-//! Typed errors for graviton modules.
+//! Typed errors for orrery-tui modules.
 //!
-//! Use [`GravitonError`] inside the library and convert to `anyhow::Error` at the CLI boundary.
+//! Use [`OrreryTuiError`] inside the library and convert to `anyhow::Error` at the CLI boundary.
 
 use std::path::PathBuf;
 
 /// Application-wide error type.
 #[derive(Debug, thiserror::Error)]
-pub enum GravitonError {
+pub enum OrreryTuiError {
     #[error("scenario error: {0}")]
     Scenario(#[from] ScenarioError),
 
@@ -104,8 +104,8 @@ pub enum RenderError {
     },
 }
 
-/// Result alias used inside graviton modules.
-pub type Result<T> = std::result::Result<T, GravitonError>;
+/// Result alias used inside orrery-tui modules.
+pub type Result<T> = std::result::Result<T, OrreryTuiError>;
 
 fn format_validation_messages(messages: &[String]) -> String {
     messages
@@ -117,8 +117,8 @@ fn format_validation_messages(messages: &[String]) -> String {
 
 /// Convenience for unimplemented subsystems during early phases.
 #[allow(dead_code)]
-pub fn not_implemented(feature: &str, phase: &str) -> GravitonError {
-    GravitonError::Other(format!("{feature} is not implemented yet ({phase})"))
+pub fn not_implemented(feature: &str, phase: &str) -> OrreryTuiError {
+    OrreryTuiError::Other(format!("{feature} is not implemented yet ({phase})"))
 }
 
 #[cfg(test)]
@@ -150,7 +150,7 @@ mod compile_tests {
         let _ = HorizonsError::Http("timeout".into());
         let _ = HorizonsError::MissingVectorTable;
         let _ = HorizonsError::UnknownUnits;
-        let _ = GravitonError::StdIo(std::io::Error::from(std::io::ErrorKind::NotFound));
+        let _ = OrreryTuiError::StdIo(std::io::Error::from(std::io::ErrorKind::NotFound));
         let _ = RenderError::TerminalTooSmall {
             min_width: 80,
             min_height: 24,

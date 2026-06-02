@@ -4,10 +4,10 @@ use std::process::Command;
 
 #[test]
 fn binary_help_exits_successfully() {
-    let output = Command::new(env!("CARGO_BIN_EXE_graviton"))
+    let output = Command::new(env!("CARGO_BIN_EXE_orrery-tui"))
         .arg("--help")
         .output()
-        .expect("failed to run graviton --help");
+        .expect("failed to run orrery-tui --help");
 
     assert!(
         output.status.success(),
@@ -15,7 +15,7 @@ fn binary_help_exits_successfully() {
         String::from_utf8_lossy(&output.stderr)
     );
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("graviton"));
+    assert!(stdout.contains("orrery-tui"));
     assert!(stdout.contains("run"));
     assert!(stdout.contains("fetch"));
     assert!(stdout.contains("validate"));
@@ -25,10 +25,10 @@ fn binary_help_exits_successfully() {
 
 #[test]
 fn list_scenarios_exits_successfully() {
-    let output = Command::new(env!("CARGO_BIN_EXE_graviton"))
+    let output = Command::new(env!("CARGO_BIN_EXE_orrery-tui"))
         .arg("list-scenarios")
         .output()
-        .expect("failed to run graviton list-scenarios");
+        .expect("failed to run orrery-tui list-scenarios");
 
     assert!(output.status.success());
 }

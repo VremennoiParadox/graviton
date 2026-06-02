@@ -5,13 +5,13 @@ use std::path::PathBuf;
 
 use reqwest::Client;
 
-use crate::error::{GravitonError, HorizonsError, Result};
+use crate::error::{OrreryTuiError, HorizonsError, Result};
 use crate::horizons::cache::{raw_cache_path, read_raw_cache, write_raw_cache};
 use crate::horizons::client;
 use crate::horizons::ids::{self, HorizonsBody};
 use crate::horizons::parser::{self, ParsedVector};
 
-/// Options for `graviton fetch`.
+/// Options for `orrery-tui fetch`.
 pub struct FetchOptions {
     pub preset: String,
     pub date: Option<String>,
@@ -25,7 +25,7 @@ pub struct FetchOptions {
 pub fn run_fetch(options: FetchOptions) -> Result<PathBuf> {
     match options.preset.as_str() {
         "solar-system" => fetch_solar_system(options),
-        other => Err(GravitonError::Other(format!(
+        other => Err(OrreryTuiError::Other(format!(
             "unknown fetch preset `{other}` (only `solar-system` is supported)"
         ))),
     }
@@ -41,7 +41,7 @@ fn fetch_solar_system(options: FetchOptions) -> Result<PathBuf> {
         .output
         .unwrap_or_else(|| PathBuf::from("scenarios/solar-system.toml"));
 
-    let rt = tokio::runtime::Runtime::new().map_err(|e| GravitonError::Other(e.to_string()))?;
+    let rt = tokio::runtime::Runtime::new().map_err(|e| OrreryTuiError::Other(e.to_string()))?;
     let client = Client::builder()
         .timeout(std::time::Duration::from_secs(60))
         .build()
@@ -64,12 +64,12 @@ fn fetch_solar_system(options: FetchOptions) -> Result<PathBuf> {
 
     let toml = build_solar_system_toml(&body_vectors, &date_iso, &options.center)?;
     if let Some(parent) = output.parent() {
-        fs::create_dir_all(parent).map_err(|e| GravitonError::Io {
+        fs::create_dir_all(parent).map_err(|e| OrreryTuiError::Io {
             path: parent.to_path_buf(),
             source: e,
         })?;
     }
-    fs::write(&output, toml).map_err(|e| GravitonError::Io {
+    fs::write(&output, toml).map_err(|e| OrreryTuiError::Io {
         path: output.clone(),
         source: e,
     })?;
@@ -106,7 +106,7 @@ async fn fetch_body_vector(
         }
         read_raw_cache(&cache_path)?
     } else if offline {
-        return Err(GravitonError::Other(format!(
+        return Err(OrreryTuiError::Other(format!(
             "offline mode: no cache for {} ({}) at {}",
             body.name,
             body.horizons_id,
@@ -119,7 +119,7 @@ async fn fetch_body_vector(
     };
 
     parser::parse_first_vector(&response).map_err(|e| {
-        GravitonError::Other(format!(
+        OrreryTuiError::Other(format!(
             "failed to parse HORIZONS vectors for {} ({}): {e}",
             body.name, body.horizons_id
         ))
@@ -137,7 +137,7 @@ fn build_solar_system_toml(
     out.push_str(&format!(
         "description = \"Barycentric state vectors from NASA JPL HORIZONS ({date_iso}, center {center}).\"\n"
     ));
-    out.push_str("author = \"graviton (graviton fetch)\"\n\n");
+    out.push_str("author = \"orrery-tui (orrery-tui fetch)\"\n\n");
     out.push_str("[units]\n");
     out.push_str("distance = \"au\"\n");
     out.push_str("mass = \"kg\"\n");
@@ -183,19 +183,19 @@ fn default_date_iso() -> String {
 fn add_one_day_iso(iso: &str) -> Result<String> {
     let parts: Vec<&str> = iso.split('-').collect();
     if parts.len() != 3 {
-        return Err(GravitonError::Other(format!(
+        return Err(OrreryTuiError::Other(format!(
             "invalid date `{iso}` (expected YYYY-MM-DD)"
         )));
     }
     let mut year: i32 = parts[0]
         .parse()
-        .map_err(|_| GravitonError::Other(format!("invalid year in date `{iso}`")))?;
+        .map_err(|_| OrreryTuiError::Other(format!("invalid year in date `{iso}`")))?;
     let mut month: u32 = parts[1]
         .parse()
-        .map_err(|_| GravitonError::Other(format!("invalid month in date `{iso}`")))?;
+        .map_err(|_| OrreryTuiError::Other(format!("invalid month in date `{iso}`")))?;
     let mut day: u32 = parts[2]
         .parse()
-        .map_err(|_| GravitonError::Other(format!("invalid day in date `{iso}`")))?;
+        .map_err(|_| OrreryTuiError::Other(format!("invalid day in date `{iso}`")))?;
 
     day += 1;
     let days_in_month = days_in_month(year, month);
@@ -230,7 +230,7 @@ fn days_in_month(year: i32, month: u32) -> u32 {
 fn iso_to_horizons_date(iso: &str) -> Result<String> {
     let parts: Vec<&str> = iso.split('-').collect();
     if parts.len() != 3 {
-        return Err(GravitonError::Other(format!(
+        return Err(OrreryTuiError::Other(format!(
             "invalid date `{iso}` (expected YYYY-MM-DD)"
         )));
     }
@@ -248,14 +248,14 @@ fn iso_to_horizons_date(iso: &str) -> Result<String> {
         "11" => "Nov",
         "12" => "Dec",
         other => {
-            return Err(GravitonError::Other(format!(
+            return Err(OrreryTuiError::Other(format!(
                 "invalid month `{other}` in date `{iso}`"
             )));
         }
     };
     let day: u8 = parts[2]
         .parse()
-        .map_err(|_| GravitonError::Other(format!("invalid day in date `{iso}`")))?;
+        .map_err(|_| OrreryTuiError::Other(format!("invalid day in date `{iso}`")))?;
     Ok(format!("{}-{}-{:02}", parts[0], month, day))
 }
 

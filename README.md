@@ -1,20 +1,20 @@
-# graviton
+# orrery-tui
 
 **A Newtonian N-body simulator in your terminal** — real NASA HORIZONS ephemerides, RK4 integration, Barnes–Hut gravity, and a ratatui UI with trails, heatmaps, and orbital diagnostics.
 
-![graviton demo](assets/demo.svg)
+![orrery-tui demo](assets/demo.svg)
 
 Record an animated GIF for releases: `./scripts/record-demo.sh` (requires [VHS](https://github.com/charmbracelet/vhs)) → `assets/demo.gif`.
 
-[![CI](https://github.com/VremennoiParadox/graviton/actions/workflows/ci.yml/badge.svg)](https://github.com/VremennoiParadox/graviton/actions/workflows/ci.yml)
+[![CI](https://github.com/VremennoiParadox/orrery-tui/actions/workflows/ci.yml/badge.svg)](https://github.com/VremennoiParadox/orrery-tui/actions/workflows/ci.yml)
 ![license](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)
 ![rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg)
 
 > **Status:** v0.1.0 — feature-complete for the initial roadmap (Phases 0–6). See [Roadmap](#roadmap) and [PLANNING.md](PLANNING.md).
 
-## Why graviton exists
+## Why orrery-tui exists
 
-Orbital mechanics is easier to trust when you can **see** energy drift, switch between direct O(n²) gravity and Barnes–Hut, and drop in real Solar System state vectors from JPL. graviton packages that into a single Rust binary with no GUI framework — only Unicode, 24-bit color, and honest physics notes.
+Orbital mechanics is easier to trust when you can **see** energy drift, switch between direct O(n²) gravity and Barnes–Hut, and drop in real Solar System state vectors from JPL. orrery-tui packages that into a single Rust binary with no GUI framework — only Unicode, 24-bit color, and honest physics notes.
 
 ## Features
 
@@ -30,17 +30,17 @@ Orbital mechanics is easier to trust when you can **see** energy drift, switch b
 ### From source (recommended)
 
 ```bash
-git clone https://github.com/VremennoiParadox/graviton.git
-cd graviton
+git clone https://github.com/VremennoiParadox/orrery-tui.git
+cd orrery-tui
 cargo build --release
-./target/release/graviton --help
+./target/release/orrery-tui --help
 ```
 
 ### crates.io (after publish)
 
 ```bash
-cargo install graviton
-graviton run scenarios/earth-moon.toml
+cargo install orrery-tui
+orrery-tui run scenarios/earth-moon.toml
 ```
 
 **Requirements:** Rust 1.75+, a true-color terminal (Kitty, Alacritty, Ghostty, etc.).
@@ -121,7 +121,7 @@ cargo run --release -- fetch solar-system --date 2026-06-01
 cargo run --release -- validate scenarios/solar-system.toml
 ```
 
-Cache: `~/.cache/graviton/horizons/raw/`. Use `--offline` after the first fetch, or `--force` to refresh.
+Cache: `~/.cache/orrery-tui/horizons/raw/`. Use `--offline` after the first fetch, or `--force` to refresh.
 
 Details: [docs/horizons.md](docs/horizons.md).
 
@@ -222,7 +222,7 @@ Barnes–Hut typically wins at hundreds+ bodies; direct is fine for small system
 | HORIZONS fetch + cache | More ephemeris presets |
 | TUI + heatmap + Barnes–Hut | Collision detection |
 | Scenario TOML + asteroid belt | `cargo deny` / audit in CI |
-| CI + docs | Split crates (`graviton-core`, …) |
+| CI + docs | Split crates (`orrery-tui-core`, …) |
 
 Full historical plan: [PLANNING.md](PLANNING.md).
 
@@ -236,7 +236,7 @@ Full historical plan: [PLANNING.md](PLANNING.md).
 
 ## Contributing
 
-Contributions welcome — read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Open an [issue](https://github.com/VremennoiParadox/graviton/issues) before large changes.
+Contributions welcome — read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Open an [issue](https://github.com/VremennoiParadox/orrery-tui/issues) before large changes.
 
 ## License
 

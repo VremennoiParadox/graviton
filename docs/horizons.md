@@ -1,6 +1,6 @@
 # NASA JPL HORIZONS integration
 
-graviton can download real Solar System state vectors from the [JPL Horizons](https://ssd.jpl.nasa.gov/horizons/) API and write a scenario TOML.
+orrery-tui can download real Solar System state vectors from the [JPL Horizons](https://ssd.jpl.nasa.gov/horizons/) API and write a scenario TOML.
 
 ## Quick usage
 
@@ -56,7 +56,7 @@ Masses and radii in the generated TOML come from built-in catalog values, not fr
 Raw JSON is stored under:
 
 ```text
-~/.cache/graviton/horizons/raw/{id}_{date}_{center}.json
+~/.cache/orrery-tui/horizons/raw/{id}_{date}_{center}.json
 ```
 
 Example: `399_2026-Jun-01_500_at_0.json`
@@ -80,7 +80,7 @@ cargo run -- fetch solar-system --date 2026-06-01 --force
 ## CLI options
 
 ```text
-graviton fetch solar-system [--date YYYY-MM-DD] [--center 500@0] [--output path] [--offline] [--force]
+orrery-tui fetch solar-system [--date YYYY-MM-DD] [--center 500@0] [--output path] [--offline] [--force]
 ```
 
 ## Reproducibility

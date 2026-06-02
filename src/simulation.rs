@@ -1,6 +1,6 @@
 //! Headless simulation driver and diagnostic reporting.
 
-use crate::error::{GravitonError, Result};
+use crate::error::{OrreryTuiError, Result};
 use crate::physics::constants::DAY;
 use crate::physics::diagnostics::{compute, Diagnostics};
 use crate::physics::integrator::{Integrator, Rk4Integrator};
@@ -15,7 +15,7 @@ pub fn run_headless(
 ) -> Result<(Diagnostics, Diagnostics)> {
     if let Some(dt) = dt_override {
         if dt <= 0.0 || !dt.is_finite() {
-            return Err(GravitonError::Scenario(
+            return Err(OrreryTuiError::Scenario(
                 crate::error::ScenarioError::InvalidTimeStep,
             ));
         }

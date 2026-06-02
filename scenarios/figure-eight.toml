@@ -1,7 +1,7 @@
 schema_version = 1
 name = "Figure-8 Three-Body"
 description = "A classic equal-mass three-body periodic orbit."
-author = "graviton"
+author = "orrery-tui"
 
 [units]
 distance = "custom"

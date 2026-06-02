@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
   <rect width="960" height="540" fill="#1e1e2e"/>
   <rect x="24" y="24" width="912" height="492" rx="8" fill="#11111b" stroke="#45475a" stroke-width="2"/>
-  <text x="48" y="72" fill="#cdd6f4" font-family="monospace" font-size="18">graviton | earth-moon.toml | running</text>
+  <text x="48" y="72" fill="#cdd6f4" font-family="monospace" font-size="18">orrery-tui | earth-moon.toml | running</text>
   <circle cx="320" cy="280" r="28" fill="#fff4ea"/>
   <circle cx="520" cy="280" r="10" fill="#c0c0c0"/>
   <text x="48" y="480" fill="#a6e3a1" font-family="monospace" font-size="14">Run ./scripts/record-demo.sh for assets/demo.gif</text>

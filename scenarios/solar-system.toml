@@ -1,7 +1,7 @@
 schema_version = 1
 name = "Solar System (HORIZONS)"
 description = "Barycentric state vectors from NASA JPL HORIZONS (2026-06-01, center 500@0)."
-author = "graviton (graviton fetch)"
+author = "orrery-tui (orrery-tui fetch)"
 
 [units]
 distance = "au"

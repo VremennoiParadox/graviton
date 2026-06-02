@@ -8,14 +8,14 @@ use clap::{Parser, Subcommand, ValueEnum};
 use tracing::info;
 
 use crate::app::App;
-use crate::error::{GravitonError, Result};
+use crate::error::{OrreryTuiError, Result};
 use crate::scenario::load;
 use crate::simulation::{print_diagnostics, run_headless};
 
 /// Terminal N-body gravitational simulator.
 #[derive(Debug, Parser)]
 #[command(
-    name = "graviton",
+    name = "orrery-tui",
     version,
     about = "Terminal N-body gravitational simulator with NASA HORIZONS data",
     long_about = "Simulate Newtonian N-body gravity in the terminal.\n\
@@ -23,7 +23,7 @@ use crate::simulation::{print_diagnostics, run_headless};
                   and explore orbits with an interactive TUI."
 )]
 pub struct Cli {
-    /// Log level filter (e.g. `info`, `debug`, `graviton=trace`).
+    /// Log level filter (e.g. `info`, `debug`, `orrery-tui=trace`).
     #[arg(long, global = true, env = "RUST_LOG", default_value = "warn")]
     pub log: String,
 
@@ -42,7 +42,7 @@ pub enum Commands {
     /// Validate a scenario TOML file without running.
     Validate(ValidateArgs),
 
-    /// List bundled scenario files shipped with graviton.
+    /// List bundled scenario files shipped with orrery-tui.
     ListScenarios,
 
     /// Run physics and rendering benchmarks.
@@ -164,14 +164,14 @@ fn run_simulation(args: RunArgs) -> Result<()> {
     info!(scenario = %args.scenario.display(), headless = args.headless, "run requested");
 
     if !args.scenario.exists() {
-        return Err(GravitonError::Other(format!(
+        return Err(OrreryTuiError::Other(format!(
             "scenario file not found: {}",
             args.scenario.display()
         )));
     }
 
     if args.integrator != IntegratorArg::Rk4 {
-        return Err(GravitonError::Physics(
+        return Err(OrreryTuiError::Physics(
             crate::error::PhysicsError::NotImplemented(format!("{:?}", args.integrator)),
         ));
     }
@@ -204,13 +204,13 @@ fn fetch_horizons(args: FetchArgs) -> Result<()> {
         offline: args.offline,
         force: args.force,
     })?;
-    println!("Run: graviton run {}", path.display());
+    println!("Run: orrery-tui run {}", path.display());
     Ok(())
 }
 
 fn validate_scenarios(args: ValidateArgs) -> Result<()> {
     if args.paths.is_empty() {
-        return Err(GravitonError::Other(
+        return Err(OrreryTuiError::Other(
             "provide at least one scenario path to validate".into(),
         ));
     }
@@ -239,7 +239,7 @@ fn validate_scenarios(args: ValidateArgs) -> Result<()> {
     }
 
     if any_error {
-        return Err(GravitonError::Other(
+        return Err(OrreryTuiError::Other(
             "one or more scenarios failed validation".into(),
         ));
     }
@@ -254,11 +254,11 @@ fn list_scenarios() -> Result<()> {
     }
 
     let mut found = false;
-    for entry in std::fs::read_dir(&scenarios_dir).map_err(|e| GravitonError::Io {
+    for entry in std::fs::read_dir(&scenarios_dir).map_err(|e| OrreryTuiError::Io {
         path: scenarios_dir.clone(),
         source: e,
     })? {
-        let entry = entry.map_err(|e| GravitonError::Io {
+        let entry = entry.map_err(|e| OrreryTuiError::Io {
             path: scenarios_dir.clone(),
             source: e,
         })?;

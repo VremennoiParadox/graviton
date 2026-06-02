@@ -1,5 +1,5 @@
-# graviton README demo — render with: vhs assets/demo.tape
-# Requires: vhs (https://github.com/charmbracelet/vhs), built graviton binary
+# orrery-tui README demo — render with: vhs assets/demo.tape
+# Requires: vhs (https://github.com/charmbracelet/vhs), built orrery-tui binary
 
 Output assets/demo.gif
 Set Shell "bash"
@@ -10,12 +10,12 @@ Set Theme "Catppuccin Mocha"
 Set Padding 24
 
 Hide
-Type "cd graviton && cargo build --release 2>/dev/null"
+Type "cargo build --release 2>/dev/null"
 Enter
 Sleep 2s
 Show
 
-Type "./target/release/graviton run scenarios/earth-moon.toml"
+Type "./target/release/orrery-tui run scenarios/earth-moon.toml"
 Enter
 Sleep 4s
 

@@ -2,9 +2,9 @@
 
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use glam::DVec3;
-use graviton::physics::barnes_hut;
-use graviton::physics::body::{Body, BodyClass};
-use graviton::physics::gravity::direct_accelerations;
+use orrery_tui::physics::barnes_hut;
+use orrery_tui::physics::body::{Body, BodyClass};
+use orrery_tui::physics::gravity::direct_accelerations;
 
 fn random_system(n: usize) -> (Vec<Body>, Vec<DVec3>) {
     let mut bodies = Vec::with_capacity(n);

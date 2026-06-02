@@ -1,4 +1,4 @@
-# Contributing to graviton
+# Contributing to orrery-tui
 
 Thank you for your interest in contributing. This project is a learning-friendly N-body simulator; clear issues and focused PRs are especially welcome.
 
@@ -24,7 +24,7 @@ cargo run -- validate scenarios/earth-moon.toml
 
 ## What to work on
 
-See [open issues](https://github.com/VremennoiParadox/graviton/issues) and [PLANNING.md](PLANNING.md) for the long-term roadmap. Good first contributions:
+See [open issues](https://github.com/VremennoiParadox/orrery-tui/issues) and [PLANNING.md](PLANNING.md) for the long-term roadmap. Good first contributions:
 
 - Scenario examples and documentation fixes
 - Test coverage for physics edge cases
@@ -72,4 +72,4 @@ This project follows [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## Questions
 
-Open a [discussion or issue](https://github.com/VremennoiParadox/graviton/issues) if you are unsure before investing in a large change.
+Open a [discussion or issue](https://github.com/VremennoiParadox/orrery-tui/issues) if you are unsure before investing in a large change.

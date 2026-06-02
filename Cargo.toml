@@ -1,25 +1,25 @@
 [package]
-name = "graviton"
+name = "orrery-tui"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.75"
 description = "Terminal N-body gravitational simulator with NASA HORIZONS ephemeris data"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/VremennoiParadox/graviton"
-homepage = "https://github.com/VremennoiParadox/graviton"
-documentation = "https://github.com/VremennoiParadox/graviton#readme"
+repository = "https://github.com/VremennoiParadox/orrery-tui"
+homepage = "https://github.com/VremennoiParadox/orrery-tui"
+documentation = "https://github.com/VremennoiParadox/orrery-tui#readme"
 keywords = ["n-body", "orbital-mechanics", "tui", "simulation", "astronomy"]
 categories = ["simulation", "science", "command-line-utilities"]
 exclude = ["PLANNING.md", "assets/demo.cast", ".github/**/*"]
 authors = ["VremennoiParadox"]
 
 [lib]
-name = "graviton"
+name = "orrery_tui"
 path = "src/lib.rs"
 
 [[bin]]
-name = "graviton"
+name = "orrery-tui"
 path = "src/main.rs"
 
 [[bench]]

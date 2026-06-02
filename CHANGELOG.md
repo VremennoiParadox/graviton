@@ -1,6 +1,12 @@
 # Changelog
 
-All notable changes to graviton are documented here.
+All notable changes to orrery-tui are documented here.
+
+## [Unreleased]
+
+### Changed
+
+- Project renamed from **graviton** to **orrery-tui** (crate, binary, docs, cache path `~/.cache/orrery-tui/`).
 
 ## [0.1.0] - 2026-06-02
 
@@ -14,4 +20,4 @@ All notable changes to graviton are documented here.
 - Headless mode, benchmarks, and GitHub Actions CI
 - Documentation in `docs/` and contribution templates
 
-[0.1.0]: https://github.com/VremennoiParadox/graviton/releases/tag/v0.1.0
+[0.1.0]: https://github.com/VremennoiParadox/orrery-tui/releases/tag/v0.1.0
