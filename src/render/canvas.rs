@@ -5,7 +5,9 @@ use ratatui::style::{Color, Style};
 use ratatui::text::Span;
 
 use crate::render::camera::Camera;
-use crate::render::colors::{body_color, com_marker_color, selection_accent, star_glow_color, trail_color};
+use crate::render::colors::{
+    body_color, com_marker_color, selection_accent, star_glow_color, trail_color,
+};
 
 /// One drawable cell in the simulation view.
 #[derive(Debug, Clone)]
@@ -108,12 +110,7 @@ impl SimulationCanvas {
         let screen = camera.world_to_screen(world, self.width, self.height);
         let cx = screen.x.round() as i32;
         let cy = screen.y.round() as i32;
-        for (dx, dy, ch) in [
-            (0, -2, '┴'),
-            (0, 2, '┬'),
-            (-2, 0, '┤'),
-            (2, 0, '├'),
-        ] {
+        for (dx, dy, ch) in [(0, -2, '┴'), (0, 2, '┬'), (-2, 0, '┤'), (2, 0, '├')] {
             let x = cx + dx;
             let y = cy + dy;
             if x >= 0 && y >= 0 && x < i32::from(self.width) && y < i32::from(self.height) {

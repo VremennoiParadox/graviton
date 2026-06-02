@@ -14,5 +14,5 @@
 # Snapshot test artifacts
 **/snapshots/*.new
 
-# Demo assets (generated)
+# Demo assets (generated locally; demo.gif is committed when present)
 /assets/demo.cast

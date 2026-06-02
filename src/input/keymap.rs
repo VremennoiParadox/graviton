@@ -74,25 +74,11 @@ pub fn map_key(event: KeyEvent) -> AppCommand {
         KeyCode::Char(',') => AppCommand::DecreaseTimeWarp,
         KeyCode::Char(']') => AppCommand::IncreaseDt,
         KeyCode::Char('[') => AppCommand::DecreaseDt,
-        KeyCode::Up | KeyCode::Char('k') => AppCommand::Pan {
-            dx: 0.0,
-            dy: 1.0,
-        },
-        KeyCode::Down | KeyCode::Char('j') => AppCommand::Pan {
-            dx: 0.0,
-            dy: -1.0,
-        },
-        KeyCode::Left | KeyCode::Char('h') => AppCommand::Pan {
-            dx: -1.0,
-            dy: 0.0,
-        },
-        KeyCode::Right | KeyCode::Char('l') => AppCommand::Pan {
-            dx: 1.0,
-            dy: 0.0,
-        },
-        KeyCode::Tab if event.modifiers.contains(KeyModifiers::SHIFT) => {
-            AppCommand::SelectPrevious
-        }
+        KeyCode::Up | KeyCode::Char('k') => AppCommand::Pan { dx: 0.0, dy: 1.0 },
+        KeyCode::Down | KeyCode::Char('j') => AppCommand::Pan { dx: 0.0, dy: -1.0 },
+        KeyCode::Left | KeyCode::Char('h') => AppCommand::Pan { dx: -1.0, dy: 0.0 },
+        KeyCode::Right | KeyCode::Char('l') => AppCommand::Pan { dx: 1.0, dy: 0.0 },
+        KeyCode::Tab if event.modifiers.contains(KeyModifiers::SHIFT) => AppCommand::SelectPrevious,
         KeyCode::Enter => AppCommand::ScenarioMenuConfirm,
         KeyCode::Tab | KeyCode::BackTab => AppCommand::SelectNext,
         _ => AppCommand::None,

@@ -6,8 +6,13 @@ rust-version = "1.75"
 description = "Terminal N-body gravitational simulator with NASA HORIZONS ephemeris data"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
+repository = "https://github.com/VremennoiParadox/graviton"
+homepage = "https://github.com/VremennoiParadox/graviton"
+documentation = "https://github.com/VremennoiParadox/graviton#readme"
 keywords = ["n-body", "orbital-mechanics", "tui", "simulation", "astronomy"]
 categories = ["simulation", "science", "command-line-utilities"]
+exclude = ["PLANNING.md", "assets/demo.cast", ".github/**/*"]
+authors = ["VremennoiParadox"]
 
 [lib]
 name = "graviton"
@@ -46,3 +51,7 @@ proptest = "1.5"
 [profile.release]
 lto = "thin"
 codegen-units = 1
+strip = true
+
+[[package.metadata.release]]
+pre-release-commit-message = "chore: release {{version}}"

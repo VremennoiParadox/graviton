@@ -5,9 +5,9 @@ use std::time::Instant;
 use glam::DVec3;
 
 use crate::error::Result;
-use crate::physics::body::{Body, BodyClass};
 use crate::physics::barnes_hut;
-use crate::physics::gravity::{direct_accelerations, accelerations};
+use crate::physics::body::{Body, BodyClass};
+use crate::physics::gravity::{accelerations, direct_accelerations};
 use crate::physics::system::PhysicsSettings;
 
 /// Run acceleration benchmarks and print timings to stdout.
@@ -82,9 +82,7 @@ fn bench(mut f: impl FnMut()) -> f64 {
 fn random_system(n: usize, seed: u64) -> (Vec<Body>, Vec<DVec3>) {
     let mut state = seed;
     let mut next = || {
-        state = state
-            .wrapping_mul(6364136223846793005)
-            .wrapping_add(1);
+        state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
         (state >> 11) as f64 / u32::MAX as f64
     };
 

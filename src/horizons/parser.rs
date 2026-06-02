@@ -27,9 +27,7 @@ pub fn parse_first_vector(response: &HorizonsResponse) -> Result<ParsedVector> {
     ensure_vector_table(&response.result)?;
     let units = detect_units(&response.result)?;
     let table = extract_table(&response.result)?;
-    let row = table
-        .first()
-        .ok_or(HorizonsError::MissingVectorTable)?;
+    let row = table.first().ok_or(HorizonsError::MissingVectorTable)?;
     parse_row(row, units)
 }
 
@@ -72,13 +70,8 @@ pub fn detect_units(result: &str) -> Result<VectorUnits> {
 }
 
 fn extract_table(result: &str) -> Result<Vec<Vec<String>>> {
-    let start = result
-        .find(SOE)
-        .ok_or(HorizonsError::MissingVectorTable)?
-        + SOE.len();
-    let end = result
-        .find(EOE)
-        .ok_or(HorizonsError::MissingVectorTable)?;
+    let start = result.find(SOE).ok_or(HorizonsError::MissingVectorTable)? + SOE.len();
+    let end = result.find(EOE).ok_or(HorizonsError::MissingVectorTable)?;
     if end <= start {
         return Err(HorizonsError::MissingVectorTable.into());
     }
@@ -103,12 +96,24 @@ fn extract_table(result: &str) -> Result<Vec<Vec<String>>> {
 
 fn parse_row(fields: &[String], units: VectorUnits) -> Result<ParsedVector> {
     // CSV: JD, calendar, X, Y, Z, VX, VY, VZ, ...
-    let x: f64 = fields[2].parse().map_err(|_| HorizonsError::MissingVectorTable)?;
-    let y: f64 = fields[3].parse().map_err(|_| HorizonsError::MissingVectorTable)?;
-    let z: f64 = fields[4].parse().map_err(|_| HorizonsError::MissingVectorTable)?;
-    let vx: f64 = fields[5].parse().map_err(|_| HorizonsError::MissingVectorTable)?;
-    let vy: f64 = fields[6].parse().map_err(|_| HorizonsError::MissingVectorTable)?;
-    let vz: f64 = fields[7].parse().map_err(|_| HorizonsError::MissingVectorTable)?;
+    let x: f64 = fields[2]
+        .parse()
+        .map_err(|_| HorizonsError::MissingVectorTable)?;
+    let y: f64 = fields[3]
+        .parse()
+        .map_err(|_| HorizonsError::MissingVectorTable)?;
+    let z: f64 = fields[4]
+        .parse()
+        .map_err(|_| HorizonsError::MissingVectorTable)?;
+    let vx: f64 = fields[5]
+        .parse()
+        .map_err(|_| HorizonsError::MissingVectorTable)?;
+    let vy: f64 = fields[6]
+        .parse()
+        .map_err(|_| HorizonsError::MissingVectorTable)?;
+    let vz: f64 = fields[7]
+        .parse()
+        .map_err(|_| HorizonsError::MissingVectorTable)?;
 
     let (position_au, velocity_au_per_day) = match units {
         VectorUnits::AuAndAuPerDay => ([x, y, z], [vx, vy, vz]),
@@ -128,7 +133,9 @@ fn parse_row(fields: &[String], units: VectorUnits) -> Result<ParsedVector> {
         }
     };
 
-    if !position_au.iter().all(|v| v.is_finite()) || !velocity_au_per_day.iter().all(|v| v.is_finite()) {
+    if !position_au.iter().all(|v| v.is_finite())
+        || !velocity_au_per_day.iter().all(|v| v.is_finite())
+    {
         return Err(HorizonsError::MissingVectorTable.into());
     }
 
@@ -151,7 +158,10 @@ mod tests {
         ))
         .expect("fixture");
         let response: HorizonsResponse = serde_json::from_str(&text).expect("json");
-        assert_eq!(detect_units(&response.result).unwrap(), VectorUnits::KmAndKmPerSecond);
+        assert_eq!(
+            detect_units(&response.result).unwrap(),
+            VectorUnits::KmAndKmPerSecond
+        );
         let vector = parse_first_vector(&response).expect("parse");
         let r_au = (vector.position_au[0].powi(2)
             + vector.position_au[1].powi(2)

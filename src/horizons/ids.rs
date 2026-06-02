@@ -16,17 +16,7 @@ pub struct HorizonsBody {
 /// Default Solar System preset from PLANNING.md (inner + outer planets, Moon, Pluto).
 pub fn solar_system_default() -> &'static [HorizonsBody] {
     &[
-        SUN,
-        MERCURY,
-        VENUS,
-        EARTH,
-        MOON,
-        MARS,
-        JUPITER,
-        SATURN,
-        URANUS,
-        NEPTUNE,
-        PLUTO,
+        SUN, MERCURY, VENUS, EARTH, MOON, MARS, JUPITER, SATURN, URANUS, NEPTUNE, PLUTO,
     ]
 }
 

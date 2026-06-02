@@ -33,5 +33,7 @@ fn run_drift(system: &mut SystemState, steps: u64) -> f64 {
         integrator.step(system).expect("step");
     }
     let final_diag = compute(system);
-    final_diag.energy_drift_fraction(initial.total_energy_j).abs()
+    final_diag
+        .energy_drift_fraction(initial.total_energy_j)
+        .abs()
 }

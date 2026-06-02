@@ -119,7 +119,10 @@ fn render_footer(frame: &mut ratatui::Frame<'_>, app: &App, area: Rect) {
     ];
 
     if let Some(stats) = app.barnes_hut_tree_stats {
-        parts.push(format!("octree: {} nodes depth {}", stats.nodes, stats.max_depth));
+        parts.push(format!(
+            "octree: {} nodes depth {}",
+            stats.nodes, stats.max_depth
+        ));
     }
 
     if app.render_settings.show_momentum_diagnostics {
@@ -132,10 +135,8 @@ fn render_footer(frame: &mut ratatui::Frame<'_>, app: &App, area: Rect) {
     if app.render_settings.show_energy_diagnostics {
         let spark = energy_sparkline(&app.energy_history.samples);
         line.spans.push(Span::raw(" | "));
-        line.spans.push(Span::styled(
-            spark,
-            Style::default().fg(Color::Yellow),
-        ));
+        line.spans
+            .push(Span::styled(spark, Style::default().fg(Color::Yellow)));
     }
 
     frame.render_widget(Paragraph::new(line), area);
@@ -217,10 +218,7 @@ fn render_selected_panel(frame: &mut ratatui::Frame<'_>, app: &App, area: Rect) 
             "periapsis: {:.6} AU",
             meters_to_au(peri)
         )));
-        lines.push(Line::from(format!(
-            "apoapsis: {:.6} AU",
-            meters_to_au(apo)
-        )));
+        lines.push(Line::from(format!("apoapsis: {:.6} AU", meters_to_au(apo))));
     }
 
     if let Some(period_s) = estimate_orbital_period_s(app, idx) {
@@ -328,10 +326,7 @@ pub fn render_scenario_menu(frame: &mut ratatui::Frame<'_>, app: &App, area: Rec
         .iter()
         .enumerate()
         .map(|(i, path)| {
-            let name = path
-                .file_name()
-                .and_then(|n| n.to_str())
-                .unwrap_or("?");
+            let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("?");
             let marker = if i == app.scenario_menu_index {
                 "▸ "
             } else {

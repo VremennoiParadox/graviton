@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use reqwest::Client;
 
 use crate::error::{GravitonError, HorizonsError, Result};
-use crate::horizons::cache::{read_raw_cache, write_raw_cache, raw_cache_path};
+use crate::horizons::cache::{raw_cache_path, read_raw_cache, write_raw_cache};
 use crate::horizons::client;
 use crate::horizons::ids::{self, HorizonsBody};
 use crate::horizons::parser::{self, ParsedVector};
@@ -253,9 +253,9 @@ fn iso_to_horizons_date(iso: &str) -> Result<String> {
             )));
         }
     };
-    let day: u8 = parts[2].parse().map_err(|_| {
-        GravitonError::Other(format!("invalid day in date `{iso}`"))
-    })?;
+    let day: u8 = parts[2]
+        .parse()
+        .map_err(|_| GravitonError::Other(format!("invalid day in date `{iso}`")))?;
     Ok(format!("{}-{}-{:02}", parts[0], month, day))
 }
 
@@ -265,13 +265,7 @@ mod tests {
 
     #[test]
     fn add_one_day_iso_handles_month_boundary() {
-        assert_eq!(
-            add_one_day_iso("2026-06-01").unwrap(),
-            "2026-06-02"
-        );
-        assert_eq!(
-            add_one_day_iso("2026-01-31").unwrap(),
-            "2026-02-01"
-        );
+        assert_eq!(add_one_day_iso("2026-06-01").unwrap(), "2026-06-02");
+        assert_eq!(add_one_day_iso("2026-01-31").unwrap(), "2026-02-01");
     }
 }

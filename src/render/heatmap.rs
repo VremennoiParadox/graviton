@@ -70,9 +70,7 @@ impl HeatmapCache {
         for sy in (0..ctx.height).step_by(step as usize) {
             for sx in (0..ctx.width).step_by(step as usize) {
                 let screen = DVec2::new(f64::from(sx) + 0.5, f64::from(sy) + 0.5);
-                let world_3d = ctx
-                    .camera
-                    .screen_to_world_3d(screen, ctx.width, ctx.height);
+                let world_3d = ctx.camera.screen_to_world_3d(screen, ctx.width, ctx.height);
                 let magnitude = gravitational_field_magnitude(
                     world_3d,
                     ctx.bodies,

@@ -44,12 +44,9 @@ pub async fn fetch_vectors(
         .map_err(|e| HorizonsError::Http(e.to_string()))?;
 
     if !response.status().is_success() {
-        return Err(HorizonsError::Http(format!(
-            "status {} for {}",
-            response.status(),
-            url
-        ))
-        .into());
+        return Err(
+            HorizonsError::Http(format!("status {} for {}", response.status(), url)).into(),
+        );
     }
 
     let text = response
@@ -57,9 +54,7 @@ pub async fn fetch_vectors(
         .await
         .map_err(|e| HorizonsError::Http(e.to_string()))?;
 
-    if text.contains("No ephemeris")
-        || (text.contains("ERROR") && !text.contains("\"result\""))
-    {
+    if text.contains("No ephemeris") || (text.contains("ERROR") && !text.contains("\"result\"")) {
         return Err(HorizonsError::Http(format!(
             "HORIZONS returned an error for command {command_id}"
         ))

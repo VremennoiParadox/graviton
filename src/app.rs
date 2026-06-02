@@ -154,8 +154,7 @@ impl App {
             Some(0)
         };
 
-        let scenario_paths =
-            discover_scenarios(Path::new("scenarios")).unwrap_or_default();
+        let scenario_paths = discover_scenarios(Path::new("scenarios")).unwrap_or_default();
         let scenario_menu_index = scenario_paths
             .iter()
             .position(|p| p == &scenario_path)
@@ -263,8 +262,7 @@ impl App {
             if self.system.settings.use_barnes_hut && self.barnes_hut_debug {
                 let positions: Vec<_> = self.system.bodies.iter().map(|b| b.position_m).collect();
                 let masses: Vec<_> = self.system.bodies.iter().map(|b| b.mass_kg).collect();
-                let (_, stats) =
-                    crate::physics::barnes_hut::build_tree(&positions, &masses);
+                let (_, stats) = crate::physics::barnes_hut::build_tree(&positions, &masses);
                 self.barnes_hut_tree_stats = Some(stats);
             } else {
                 self.barnes_hut_tree_stats = None;
@@ -507,10 +505,7 @@ impl App {
         match load(&self.scenario_path) {
             Ok(loaded) => {
                 let n = loaded.system.bodies.len();
-                self.show_toast(format!(
-                    "ok: {} ({n} bodies)",
-                    self.scenario_path.display()
-                ));
+                self.show_toast(format!("ok: {} ({n} bodies)", self.scenario_path.display()));
             }
             Err(e) => self.show_toast(format!("validate failed: {e}")),
         }
@@ -677,18 +672,23 @@ impl App {
         let world = self.camera.screen_to_world(screen, area.width, area.height);
 
         let threshold = 2.0 * self.camera.meters_per_cell;
-        let best = self.system.bodies.iter().enumerate().fold(None, |best, (i, body)| {
-            let projected = self.camera.project(body.position_m);
-            let dist = (projected - world).length();
-            if dist > threshold {
-                return best;
-            }
-            match best {
-                None => Some((i, dist)),
-                Some((_, d0)) if dist < d0 => Some((i, dist)),
-                other => other,
-            }
-        });
+        let best = self
+            .system
+            .bodies
+            .iter()
+            .enumerate()
+            .fold(None, |best, (i, body)| {
+                let projected = self.camera.project(body.position_m);
+                let dist = (projected - world).length();
+                if dist > threshold {
+                    return best;
+                }
+                match best {
+                    None => Some((i, dist)),
+                    Some((_, d0)) if dist < d0 => Some((i, dist)),
+                    other => other,
+                }
+            });
         if let Some((idx, _)) = best {
             self.selected_body = Some(idx);
         }

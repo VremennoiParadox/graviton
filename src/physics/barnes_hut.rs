@@ -108,7 +108,15 @@ impl OctNode {
             let old_pos = positions[old_idx];
             let old_mass = masses[old_idx];
             self.subdivide();
-            self.insert(old_idx, old_pos, old_mass, positions, masses, depth + 1, stats);
+            self.insert(
+                old_idx,
+                old_pos,
+                old_mass,
+                positions,
+                masses,
+                depth + 1,
+                stats,
+            );
         }
 
         if let Some(children) = self.children.as_mut() {
@@ -118,7 +126,14 @@ impl OctNode {
         }
     }
 
-    fn merge_leaf(&mut self, body_idx: usize, pos: DVec3, mass: f64, positions: &[DVec3], masses: &[f64]) {
+    fn merge_leaf(
+        &mut self,
+        body_idx: usize,
+        pos: DVec3,
+        mass: f64,
+        positions: &[DVec3],
+        masses: &[f64],
+    ) {
         if let Some(existing) = self.body {
             let m0 = self.mass;
             let m1 = mass;
@@ -312,10 +327,7 @@ mod tests {
             let scale = direct_acc[i].length().max(1e-12);
             max_rel = max_rel.max(diff / scale);
         }
-        assert!(
-            max_rel < 0.05,
-            "max relative acceleration error {max_rel}"
-        );
+        assert!(max_rel < 0.05, "max relative acceleration error {max_rel}");
     }
 
     #[test]
@@ -330,8 +342,7 @@ mod tests {
         let direct_acc = direct(&bodies, &positions, softening);
         let bh_acc = accelerations(&bodies, &positions, softening, 0.01);
         for i in 0..bodies.len() {
-            let rel = (direct_acc[i] - bh_acc[i]).length()
-                / direct_acc[i].length().max(1e-12);
+            let rel = (direct_acc[i] - bh_acc[i]).length() / direct_acc[i].length().max(1e-12);
             assert!(rel < 0.01, "theta~0 body {i} rel err {rel}");
         }
     }

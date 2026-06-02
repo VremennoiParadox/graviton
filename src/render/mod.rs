@@ -14,8 +14,8 @@ use ratatui::Frame;
 
 use crate::app::App;
 use crate::render::canvas::SimulationCanvas;
-use crate::render::heatmap::HeatmapBuildContext;
 use crate::render::colors::body_color;
+use crate::render::heatmap::HeatmapBuildContext;
 
 /// Draw the full frame for the interactive application.
 pub fn draw(frame: &mut Frame<'_>, app: &mut App) {

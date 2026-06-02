@@ -14,10 +14,7 @@ impl Rng {
     }
 
     fn next_f64(&mut self) -> f64 {
-        self.state = self
-            .state
-            .wrapping_mul(6364136223846793005)
-            .wrapping_add(1);
+        self.state = self.state.wrapping_mul(6364136223846793005).wrapping_add(1);
         let bits = (self.state >> 11) as u32;
         (f64::from(bits) / f64::from(u32::MAX)).clamp(0.0, 1.0 - f64::EPSILON)
     }

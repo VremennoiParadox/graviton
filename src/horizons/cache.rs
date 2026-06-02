@@ -43,9 +43,8 @@ pub fn write_raw_cache(path: &Path, response: &HorizonsResponse) -> Result<()> {
             source: e,
         })?;
     }
-    let json = serde_json::to_string_pretty(response).map_err(|e| {
-        GravitonError::Horizons(crate::error::HorizonsError::Http(e.to_string()))
-    })?;
+    let json = serde_json::to_string_pretty(response)
+        .map_err(|e| GravitonError::Horizons(crate::error::HorizonsError::Http(e.to_string())))?;
     fs::write(path, json).map_err(|e| GravitonError::Io {
         path: path.to_path_buf(),
         source: e,
