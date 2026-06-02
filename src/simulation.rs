@@ -1,6 +1,6 @@
 //! Headless simulation driver and diagnostic reporting.
 
-use crate::error::{not_implemented, GravitonError, Result};
+use crate::error::{GravitonError, Result};
 use crate::physics::constants::DAY;
 use crate::physics::diagnostics::{compute, Diagnostics};
 use crate::physics::integrator::{Integrator, Rk4Integrator};
@@ -13,10 +13,6 @@ pub fn run_headless(
     steps: u64,
     dt_override: Option<f64>,
 ) -> Result<(Diagnostics, Diagnostics)> {
-    if loaded.system.settings.use_barnes_hut {
-        return Err(not_implemented("Barnes-Hut integration", "Phase 5"));
-    }
-
     if let Some(dt) = dt_override {
         if dt <= 0.0 || !dt.is_finite() {
             return Err(GravitonError::Scenario(
@@ -45,7 +41,14 @@ pub fn print_diagnostics(
     steps: u64,
 ) {
     println!("Scenario: {}", system.scenario_name);
-    println!("Integrator: RK4 (direct O(n²) gravity)");
+    if system.settings.use_barnes_hut {
+        println!(
+            "Integrator: RK4 (Barnes–Hut, θ = {:.2})",
+            system.settings.barnes_hut_theta
+        );
+    } else {
+        println!("Integrator: RK4 (direct O(n²) gravity)");
+    }
     println!("Time step: {:.6} s", system.settings.dt_s);
     println!("Softening ε: {:.3} m", system.settings.softening_m);
     println!(

@@ -16,22 +16,22 @@ struct Derivative {
 /// Advance the system by one fixed time step using RK4.
 pub fn step(system: &mut SystemState) -> Result<()> {
     let dt = system.settings.dt_s;
-    let softening = system.settings.softening_m;
     let n = system.bodies.len();
 
     let positions: Vec<DVec3> = system.bodies.iter().map(|b| b.position_m).collect();
     let velocities: Vec<DVec3> = system.bodies.iter().map(|b| b.velocity_mps).collect();
     let masses: Vec<f64> = system.bodies.iter().map(|b| b.mass_kg).collect();
 
-    let k1 = evaluate(&system.bodies, &positions, &velocities, softening);
+    let settings = system.settings;
+    let k1 = evaluate(&system.bodies, &positions, &velocities, settings);
     let (pos2, vel2) = advance_state(&positions, &velocities, &k1, dt * 0.5);
-    let k2 = evaluate(&system.bodies, &pos2, &vel2, softening);
+    let k2 = evaluate(&system.bodies, &pos2, &vel2, settings);
 
     let (pos3, vel3) = advance_state(&positions, &velocities, &k2, dt * 0.5);
-    let k3 = evaluate(&system.bodies, &pos3, &vel3, softening);
+    let k3 = evaluate(&system.bodies, &pos3, &vel3, settings);
 
     let (pos4, vel4) = advance_state(&positions, &velocities, &k3, dt);
-    let k4 = evaluate(&system.bodies, &pos4, &vel4, softening);
+    let k4 = evaluate(&system.bodies, &pos4, &vel4, settings);
 
     for i in 0..n {
         let dr = (k1[i].dr + 2.0 * k2[i].dr + 2.0 * k3[i].dr + k4[i].dr) * (dt / 6.0);
@@ -52,9 +52,9 @@ fn evaluate(
     bodies: &[crate::physics::body::Body],
     positions: &[DVec3],
     velocities: &[DVec3],
-    softening_m: f64,
+    settings: crate::physics::system::PhysicsSettings,
 ) -> Vec<Derivative> {
-    let acc = accelerations(bodies, positions, softening_m);
+    let acc = accelerations(bodies, positions, &settings);
     velocities
         .iter()
         .zip(acc)

@@ -1,0 +1,42 @@
+schema_version = 1
+name = "Asteroid Belt (procedural)"
+description = "Sun plus a pseudo-random main-belt for Barnes–Hut stress tests."
+author = "graviton"
+
+[units]
+distance = "au"
+mass = "kg"
+time = "day"
+
+[physics]
+integrator = "rk4"
+dt = 3600.0
+dt_unit = "s"
+softening_m = 1000000.0
+
+[physics.barnes_hut]
+enabled = true
+theta = 0.7
+
+[render]
+meters_per_cell = 2000000000.0
+trail_points = 256
+follow_center_of_mass = true
+heatmap_enabled = true
+heatmap_sample_divisor = 2
+
+[asteroid_belt]
+count = 128
+inner_au = 2.2
+outer_au = 3.3
+seed = 42
+
+[[bodies]]
+id = "sun"
+name = "Sun"
+class = "star"
+mass = 1.988920000000e30
+radius = 6.963400e8
+position = [0.0, 0.0, 0.0]
+velocity = [0.0, 0.0, 0.0]
+color = "#fff4ea"

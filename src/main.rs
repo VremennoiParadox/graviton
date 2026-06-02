@@ -1,6 +1,7 @@
-//! graviton — terminal N-body gravitational simulator.
+//! graviton — terminal N-body gravitational simulator (binary entry point).
 
 mod app;
+mod bench;
 mod cli;
 mod error;
 mod horizons;
@@ -40,16 +41,14 @@ mod tests {
             "--headless",
             "--steps",
             "500",
+            "--barnes-hut",
         ])
         .unwrap();
         match cli.command {
             Commands::Run(args) => {
                 assert!(args.headless);
                 assert_eq!(args.steps, 500);
-                assert_eq!(
-                    args.scenario,
-                    std::path::Path::new("scenarios/earth-moon.toml")
-                );
+                assert!(args.barnes_hut);
             }
             _ => panic!("expected Run subcommand"),
         }

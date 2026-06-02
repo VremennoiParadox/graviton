@@ -94,7 +94,11 @@ fn render_status_bar(frame: &mut ratatui::Frame<'_>, app: &App, area: Rect) {
         Span::raw(" | "),
         Span::raw(format!("dt {:.0}s", app.system.settings.dt_s)),
         Span::raw(" | "),
-        Span::raw("RK4"),
+        Span::raw(if app.system.settings.use_barnes_hut {
+            "BH"
+        } else {
+            "RK4/direct"
+        }),
         Span::raw(" | "),
         Span::raw(proj),
         Span::raw(" | "),
@@ -113,6 +117,10 @@ fn render_footer(frame: &mut ratatui::Frame<'_>, app: &App, area: Rect) {
         format!("fps: {:.0}", app.fps),
         "? help".into(),
     ];
+
+    if let Some(stats) = app.barnes_hut_tree_stats {
+        parts.push(format!("octree: {} nodes depth {}", stats.nodes, stats.max_depth));
+    }
 
     if app.render_settings.show_momentum_diagnostics {
         let p = app.current_diagnostics.linear_momentum_kg_mps.length();
@@ -301,7 +309,8 @@ pub fn render_help(frame: &mut ratatui::Frame<'_>, area: Rect) {
         Line::from(""),
         Line::from("g  heatmap    c  COM marker    e  energy    p  momentum"),
         Line::from("o  cycle overlays    T  trails    H  HUD"),
-        Line::from("s  scenario menu    v  validate    . ,  time warp    [ ]  dt"),
+        Line::from("s  scenario menu    v  validate    B  Barnes–Hut    b  tree debug"),
+        Line::from(". ,  time warp    [ ]  dt"),
     ];
     let block = Block::default()
         .title("Help")

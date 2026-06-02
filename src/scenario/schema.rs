@@ -16,6 +16,8 @@ pub struct ScenarioFile {
     #[serde(default)]
     pub render: RenderSection,
     pub bodies: Vec<BodySpec>,
+    #[serde(default)]
+    pub asteroid_belt: Option<AsteroidBeltSection>,
 }
 
 #[derive(Debug, Default, Deserialize)]
@@ -53,6 +55,28 @@ pub struct PhysicsSection {
     pub dt_unit: Option<String>,
     #[serde(default = "default_softening")]
     pub softening_m: f64,
+    #[serde(default)]
+    pub barnes_hut: BarnesHutSection,
+}
+
+#[derive(Debug, Default, Deserialize)]
+pub struct BarnesHutSection {
+    pub enabled: Option<bool>,
+    pub theta: Option<f64>,
+}
+
+/// Procedural asteroid belt parameters (bodies generated at load time).
+#[derive(Debug, Deserialize)]
+pub struct AsteroidBeltSection {
+    pub count: u32,
+    pub inner_au: f64,
+    pub outer_au: f64,
+    #[serde(default = "default_belt_seed")]
+    pub seed: u64,
+}
+
+fn default_belt_seed() -> u64 {
+    42
 }
 
 fn default_integrator() -> String {
@@ -80,7 +104,7 @@ pub struct KittyRenderSection {
     pub mode: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 #[allow(dead_code)] // optional metadata used by fetch/validate and future phases
 pub struct BodySpec {
     pub id: String,

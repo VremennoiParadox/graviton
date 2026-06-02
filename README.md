@@ -2,7 +2,7 @@
 
 Terminal N-body gravitational simulator with NASA JPL HORIZONS ephemeris data, custom RK4 integration, and a ratatui interface.
 
-> **Status:** Phase 4 — gravitational field heatmap, polished HUD, mouse pan/zoom, scenario switcher. See [PLANNING.md](PLANNING.md) for the full roadmap.
+> **Status:** Phase 5 — Barnes–Hut octree gravity, asteroid-belt stress scenario, benchmarks. See [PLANNING.md](PLANNING.md) for the full roadmap.
 
 ## Features (planned)
 
@@ -40,6 +40,27 @@ cargo run --release -- run scenarios/solar-system.toml
 
 Raw JSON responses are cached under `~/.cache/graviton/horizons/raw/`. Re-run with `--offline` to rebuild the scenario from cache without network access, or `--force` to refresh cached data.
 
+### Barnes–Hut and stress scenarios
+
+The asteroid belt scenario generates 128 procedurally placed asteroids around the Sun (`[asteroid_belt]` in TOML). Use Barnes–Hut for larger `n`:
+
+```bash
+cargo run --release -- run scenarios/asteroid-belt.toml
+cargo run --release -- run scenarios/earth-moon.toml --barnes-hut --theta 0.7
+cargo run --release -- bench
+cargo bench --bench direct_vs_barnes_hut
+```
+
+Enable in scenario TOML:
+
+```toml
+[physics.barnes_hut]
+enabled = true
+theta = 0.7
+```
+
+**Limitations:** Barnes–Hut is an approximation; smaller `θ` is more accurate but slower. Very close encounters or extreme mass ratios can differ from direct summation. The octree is rebuilt every RK4 evaluation (simple, not yet optimized).
+
 ### Controls (TUI)
 
 | Key | Action |
@@ -61,6 +82,8 @@ Raw JSON responses are cached under `~/.cache/graviton/horizons/raw/`. Re-run wi
 | `s` | Scenario switcher |
 | `v` | Validate current scenario |
 | `Shift+R` | Reload scenario from disk |
+| `B` | Toggle Barnes–Hut / direct gravity |
+| `b` | Toggle octree debug stats in HUD |
 | `.` / `,` | Increase / decrease time warp |
 | `[` / `]` | Decrease / increase dt |
 | `r` | Reset simulation |
@@ -77,7 +100,7 @@ graviton run <scenario>       Run a simulation (TUI or headless)
 graviton fetch solar-system     Fetch HORIZONS ephemeris data
 graviton validate <scenario>  Validate a scenario TOML file
 graviton list-scenarios       List bundled scenarios
-graviton bench                Run physics benchmarks
+graviton bench                Run physics benchmarks (direct vs Barnes–Hut)
 ```
 
 ## Development

@@ -10,7 +10,7 @@ use crate::physics::body::{Body, BodyClass};
 use crate::physics::constants::{AU, DAY, M_EARTH, M_SUN};
 use crate::physics::system::{PhysicsSettings, SystemState};
 use crate::physics::units::days_to_seconds;
-use crate::render::colors::parse_hex_color;
+use crate::scenario::colors::parse_hex_color;
 use crate::scenario::schema::ScenarioFile;
 use crate::scenario::validate::validate;
 
@@ -48,8 +48,12 @@ pub fn load(path: &Path) -> Result<LoadedScenario> {
     let time_scale = time_scale_s(&raw)?;
     let velocity_scale = distance_scale / time_scale;
 
-    let bodies = raw
-        .bodies
+    let mut body_specs = raw.bodies.clone();
+    if let Some(belt) = &raw.asteroid_belt {
+        body_specs.extend(crate::scenario::belt::generate_asteroids(belt));
+    }
+
+    let bodies = body_specs
         .iter()
         .map(|spec| {
             Ok(Body {
@@ -83,11 +87,20 @@ pub fn load(path: &Path) -> Result<LoadedScenario> {
     };
 
     let dt_s = dt_seconds(&raw, time_scale)?;
+    let use_barnes_hut = raw.physics.barnes_hut.enabled.unwrap_or(false);
+    let barnes_hut_theta = raw.physics.barnes_hut.theta.unwrap_or(0.7);
+    if barnes_hut_theta <= 0.0 || !barnes_hut_theta.is_finite() {
+        return Err(ScenarioError::Validation(vec![format!(
+            "physics.barnes_hut.theta must be positive and finite, got {barnes_hut_theta}"
+        )])
+        .into());
+    }
+
     let settings = PhysicsSettings {
         dt_s,
         softening_m: raw.physics.softening_m,
-        use_barnes_hut: false,
-        barnes_hut_theta: 0.7,
+        use_barnes_hut,
+        barnes_hut_theta,
     };
 
     let system = SystemState::new(bodies, settings, raw.name.clone());
@@ -229,6 +242,14 @@ mod tests {
         assert!((moon.mass_kg - M_MOON).abs() / M_MOON < 1e-4);
         let separation = (moon.position_m - earth.position_m).length();
         assert!((separation - EARTH_MOON_DISTANCE).abs() / EARTH_MOON_DISTANCE < 1e-4);
+    }
+
+    #[test]
+    fn loads_asteroid_belt_with_generated_bodies() {
+        let loaded = load(&scenario_path("asteroid-belt.toml")).expect("asteroid belt");
+        assert_eq!(loaded.system.bodies.len(), 129);
+        assert!(loaded.system.settings.use_barnes_hut);
+        assert!((loaded.system.settings.barnes_hut_theta - 0.7).abs() < f64::EPSILON);
     }
 
     #[test]

@@ -2,17 +2,8 @@
 
 use crate::physics::body::{Body, BodyClass};
 
-/// Parse `#rrggbb` or `rrggbb` into RGB bytes.
-pub fn parse_hex_color(hex: &str) -> Option<[u8; 3]> {
-    let s = hex.trim().trim_start_matches('#');
-    if s.len() != 6 {
-        return None;
-    }
-    let r = u8::from_str_radix(&s[0..2], 16).ok()?;
-    let g = u8::from_str_radix(&s[2..4], 16).ok()?;
-    let b = u8::from_str_radix(&s[4..6], 16).ok()?;
-    Some([r, g, b])
-}
+#[allow(unused_imports)]
+pub use crate::scenario::colors::parse_hex_color;
 
 /// Resolve display color for a body (scenario override, then name, then class).
 #[must_use]

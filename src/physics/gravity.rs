@@ -7,8 +7,25 @@ use crate::physics::constants::G;
 
 /// Compute accelerations for all bodies at the given positions (meters, m/s²).
 ///
-/// Uses softened distance: `|r|² + ε²` in the denominator.
-pub fn accelerations(bodies: &[Body], positions: &[DVec3], softening_m: f64) -> Vec<DVec3> {
+/// Uses direct summation or Barnes–Hut depending on `settings`.
+pub fn accelerations(
+    bodies: &[Body],
+    positions: &[DVec3],
+    settings: &crate::physics::system::PhysicsSettings,
+) -> Vec<DVec3> {
+    if settings.use_barnes_hut {
+        return crate::physics::barnes_hut::accelerations(
+            bodies,
+            positions,
+            settings.softening_m,
+            settings.barnes_hut_theta,
+        );
+    }
+    direct_accelerations(bodies, positions, settings.softening_m)
+}
+
+/// Direct O(n²) softened gravity.
+pub fn direct_accelerations(bodies: &[Body], positions: &[DVec3], softening_m: f64) -> Vec<DVec3> {
     let n = bodies.len();
     let eps_sq = softening_m * softening_m;
     let mut acc = vec![DVec3::ZERO; n];
@@ -56,7 +73,13 @@ mod tests {
             test_body("b", M_EARTH, DVec3::new(separation, 0.0, 0.0)),
         ];
         let positions: Vec<_> = bodies.iter().map(|b| b.position_m).collect();
-        let acc = accelerations(&bodies, &positions, softening);
+        let settings = crate::physics::system::PhysicsSettings {
+            dt_s: 1.0,
+            softening_m: softening,
+            use_barnes_hut: false,
+            barnes_hut_theta: 0.7,
+        };
+        let acc = accelerations(&bodies, &positions, &settings);
 
         // a on b from a should equal - (m_a/m_b) * a on a from b (equal masses -> opposite)
         let a_on_a = acc[0];
@@ -75,7 +98,13 @@ mod tests {
             test_body("probe", 1.0, DVec3::new(r, 0.0, 0.0)),
         ];
         let positions: Vec<_> = bodies.iter().map(|b| b.position_m).collect();
-        let acc = accelerations(&bodies, &positions, softening);
+        let settings = crate::physics::system::PhysicsSettings {
+            dt_s: 1.0,
+            softening_m: softening,
+            use_barnes_hut: false,
+            barnes_hut_theta: 0.7,
+        };
+        let acc = accelerations(&bodies, &positions, &settings);
         let expected = -G * m / (r * r);
         assert!((acc[1].x - expected).abs() / expected.abs() < 1e-10);
     }

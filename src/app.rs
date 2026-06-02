@@ -16,7 +16,7 @@ use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
 
 use crate::cli::RunArgs;
-use crate::error::{not_implemented, GravitonError, Result};
+use crate::error::{GravitonError, Result};
 use crate::input::keymap::{map_key, AppCommand};
 use crate::input::mouse::{map_mouse, MouseCommand};
 use crate::physics::diagnostics::{compute, Diagnostics};
@@ -103,6 +103,8 @@ pub struct App {
     pub fps: f64,
     pub toast_message: Option<String>,
     pub toast_until: Option<Instant>,
+    pub barnes_hut_debug: bool,
+    pub barnes_hut_tree_stats: Option<crate::physics::barnes_hut::TreeStats>,
     physics_tick: u64,
     fps_timer: Instant,
     fps_frames: u32,
@@ -117,10 +119,6 @@ impl App {
         args: &RunArgs,
         render: RenderConfig,
     ) -> Result<Self> {
-        if loaded.system.settings.use_barnes_hut {
-            return Err(not_implemented("Barnes-Hut integration", "Phase 5"));
-        }
-
         let mut system = loaded.system;
         if let Some(dt) = args.dt {
             if dt <= 0.0 || !dt.is_finite() {
@@ -194,6 +192,8 @@ impl App {
             fps_timer: Instant::now(),
             fps_frames: 0,
             mouse_drag_anchor: None,
+            barnes_hut_debug: false,
+            barnes_hut_tree_stats: None,
             run_flags: RunFlags {
                 no_heatmap: args.no_heatmap,
                 no_trails: args.no_trails,
@@ -260,6 +260,16 @@ impl App {
             }
 
             self.current_diagnostics = compute(&self.system);
+            if self.system.settings.use_barnes_hut && self.barnes_hut_debug {
+                let positions: Vec<_> = self.system.bodies.iter().map(|b| b.position_m).collect();
+                let masses: Vec<_> = self.system.bodies.iter().map(|b| b.mass_kg).collect();
+                let (_, stats) =
+                    crate::physics::barnes_hut::build_tree(&positions, &masses);
+                self.barnes_hut_tree_stats = Some(stats);
+            } else {
+                self.barnes_hut_tree_stats = None;
+            }
+
             let drift = self
                 .current_diagnostics
                 .energy_drift_fraction(self.initial_diagnostics.total_energy_j);
@@ -442,6 +452,20 @@ impl App {
                 }
             }
             AppCommand::ValidateScenario => self.validate_current_scenario(),
+            AppCommand::ToggleBarnesHut => {
+                self.system.settings.use_barnes_hut = !self.system.settings.use_barnes_hut;
+                self.show_toast(format!(
+                    "Barnes–Hut {}",
+                    if self.system.settings.use_barnes_hut {
+                        "enabled"
+                    } else {
+                        "disabled (direct O(n²))"
+                    }
+                ));
+            }
+            AppCommand::ToggleBarnesHutDebug => {
+                self.barnes_hut_debug = !self.barnes_hut_debug;
+            }
             AppCommand::IncreaseTimeWarp => self.clock.increase_warp(),
             AppCommand::DecreaseTimeWarp => self.clock.decrease_warp(),
             AppCommand::IncreaseDt => {

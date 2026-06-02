@@ -1,5 +1,7 @@
 //! TOML scenario loading, validation, and conversion to SI simulation state.
 
+pub mod belt;
+pub mod colors;
 pub mod loader;
 pub mod schema;
 pub mod validate;

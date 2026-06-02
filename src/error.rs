@@ -116,6 +116,7 @@ fn format_validation_messages(messages: &[String]) -> String {
 }
 
 /// Convenience for unimplemented subsystems during early phases.
+#[allow(dead_code)]
 pub fn not_implemented(feature: &str, phase: &str) -> GravitonError {
     GravitonError::Other(format!("{feature} is not implemented yet ({phase})"))
 }

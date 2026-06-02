@@ -9,6 +9,18 @@ license = "MIT OR Apache-2.0"
 keywords = ["n-body", "orbital-mechanics", "tui", "simulation", "astronomy"]
 categories = ["simulation", "science", "command-line-utilities"]
 
+[lib]
+name = "graviton"
+path = "src/lib.rs"
+
+[[bin]]
+name = "graviton"
+path = "src/main.rs"
+
+[[bench]]
+name = "direct_vs_barnes_hut"
+harness = false
+
 [dependencies]
 ratatui = "0.29"
 crossterm = "0.28"

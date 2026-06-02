@@ -12,5 +12,4 @@ pub mod rk4;
 pub mod system;
 pub mod units;
 
-// Phase 5
-// pub mod barnes_hut;
+pub mod barnes_hut;

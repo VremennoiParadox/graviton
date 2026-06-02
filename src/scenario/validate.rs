@@ -36,8 +36,17 @@ pub fn validate(raw: &ScenarioFile) -> Result<()> {
 
     validate_units(raw, &mut errors);
 
-    if raw.bodies.is_empty() {
-        errors.push("scenario must contain at least one body".into());
+    if raw.bodies.is_empty() && raw.asteroid_belt.is_none() {
+        errors.push("scenario must contain at least one body or [asteroid_belt]".into());
+    }
+
+    if let Some(belt) = &raw.asteroid_belt {
+        if belt.count == 0 {
+            errors.push("asteroid_belt.count must be > 0".into());
+        }
+        if belt.inner_au <= 0.0 || belt.outer_au <= belt.inner_au {
+            errors.push("asteroid_belt requires 0 < inner_au < outer_au".into());
+        }
     }
 
     let mut ids = HashSet::new();

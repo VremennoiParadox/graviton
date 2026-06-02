@@ -8,7 +8,7 @@ use clap::{Parser, Subcommand, ValueEnum};
 use tracing::info;
 
 use crate::app::App;
-use crate::error::{not_implemented, GravitonError, Result};
+use crate::error::{GravitonError, Result};
 use crate::scenario::load;
 use crate::simulation::{print_diagnostics, run_headless};
 
@@ -176,11 +176,13 @@ fn run_simulation(args: RunArgs) -> Result<()> {
         ));
     }
 
-    let _ = (args.theta, args.no_heatmap, args.no_trails);
+    let _ = (args.no_heatmap, args.no_trails);
 
     let mut loaded = load(&args.scenario)?;
-    loaded.system.settings.use_barnes_hut = args.barnes_hut;
-    loaded.system.settings.barnes_hut_theta = args.theta;
+    if args.barnes_hut {
+        loaded.system.settings.use_barnes_hut = true;
+        loaded.system.settings.barnes_hut_theta = args.theta;
+    }
 
     if args.headless {
         let (initial, final_diag) = run_headless(&mut loaded, args.steps, args.dt)?;
@@ -275,6 +277,5 @@ fn list_scenarios() -> Result<()> {
 }
 
 fn run_bench(args: BenchArgs) -> Result<()> {
-    let _ = args.filter;
-    Err(not_implemented("benchmarks", "Phase 5"))
+    crate::bench::run(args.filter.as_deref())
 }
