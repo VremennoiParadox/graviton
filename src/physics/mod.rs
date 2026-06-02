@@ -5,6 +5,7 @@
 pub mod body;
 pub mod constants;
 pub mod diagnostics;
+pub mod field;
 pub mod gravity;
 pub mod integrator;
 pub mod rk4;

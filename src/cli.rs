@@ -194,8 +194,16 @@ fn run_simulation(args: RunArgs) -> Result<()> {
 
 fn fetch_horizons(args: FetchArgs) -> Result<()> {
     info!(preset = %args.preset, offline = args.offline, "fetch requested");
-    let _ = (&args.date, &args.center, &args.output, args.force);
-    Err(not_implemented("NASA JPL HORIZONS fetch", "Phase 3"))
+    let path = crate::horizons::run_fetch(crate::horizons::FetchOptions {
+        preset: args.preset,
+        date: args.date,
+        center: args.center,
+        output: args.output,
+        offline: args.offline,
+        force: args.force,
+    })?;
+    println!("Run: graviton run {}", path.display());
+    Ok(())
 }
 
 fn validate_scenarios(args: ValidateArgs) -> Result<()> {

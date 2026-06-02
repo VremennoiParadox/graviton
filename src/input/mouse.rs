@@ -1,13 +1,13 @@
-//! Mouse event mapping (Phase 4 expands this; basic pan/zoom/select in Phase 2).
+//! Mouse event mapping: select, pan (drag), zoom (scroll).
 
 use crossterm::event::{MouseButton, MouseEvent, MouseEventKind};
 
 /// Mouse-derived commands.
 #[derive(Debug, Clone, Copy)]
-#[allow(dead_code)]
 pub enum MouseCommand {
     SelectAt { col: u16, row: u16 },
-    PanBy { dx: f64, dy: f64 },
+    DragTo { col: u16, row: u16 },
+    DragEnd,
     ZoomAt { col: u16, row: u16, zoom_in: bool },
 }
 
@@ -17,6 +17,11 @@ pub fn map_mouse(event: MouseEvent) -> Option<MouseCommand> {
             col: event.column,
             row: event.row,
         }),
+        MouseEventKind::Drag(MouseButton::Left) => Some(MouseCommand::DragTo {
+            col: event.column,
+            row: event.row,
+        }),
+        MouseEventKind::Up(MouseButton::Left) => Some(MouseCommand::DragEnd),
         MouseEventKind::ScrollUp => Some(MouseCommand::ZoomAt {
             col: event.column,
             row: event.row,

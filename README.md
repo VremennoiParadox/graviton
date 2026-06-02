@@ -2,13 +2,13 @@
 
 Terminal N-body gravitational simulator with NASA JPL HORIZONS ephemeris data, custom RK4 integration, and a ratatui interface.
 
-> **Status:** Phase 2 — interactive TUI with trails, camera controls, and HUD. See [PLANNING.md](PLANNING.md) for the full roadmap.
+> **Status:** Phase 4 — gravitational field heatmap, polished HUD, mouse pan/zoom, scenario switcher. See [PLANNING.md](PLANNING.md) for the full roadmap.
 
 ## Features (planned)
 
 - Newtonian N-body gravity with RK4 integration
 - Interactive terminal UI (zoom, pan, trails, heatmap)
-- Real Solar System initial conditions via NASA JPL HORIZONS
+- Real Solar System initial conditions via NASA JPL HORIZONS (`graviton fetch solar-system`)
 - TOML scenario files for custom systems
 
 ## Requirements
@@ -28,6 +28,18 @@ cargo run --release -- run scenarios/earth-moon.toml
 cargo run --release -- run scenarios/figure-eight.toml
 ```
 
+### Solar System from HORIZONS
+
+Fetch barycentric state vectors for the default preset (Sun through Pluto) and write `scenarios/solar-system.toml`:
+
+```bash
+cargo run --release -- fetch solar-system --date 2026-06-01
+cargo run --release -- validate scenarios/solar-system.toml
+cargo run --release -- run scenarios/solar-system.toml
+```
+
+Raw JSON responses are cached under `~/.cache/graviton/horizons/raw/`. Re-run with `--offline` to rebuild the scenario from cache without network access, or `--force` to refresh cached data.
+
 ### Controls (TUI)
 
 | Key | Action |
@@ -42,11 +54,21 @@ cargo run --release -- run scenarios/figure-eight.toml
 | `1` / `2` / `3` | XY / XZ / YZ projection |
 | `T` | Toggle trails |
 | `H` | Toggle HUD |
+| `g` | Toggle gravitational field heatmap |
+| `c` | Toggle center-of-mass marker |
+| `e` / `p` | Toggle energy / momentum diagnostics |
+| `o` | Cycle overlay presets |
+| `s` | Scenario switcher |
+| `v` | Validate current scenario |
+| `Shift+R` | Reload scenario from disk |
 | `.` / `,` | Increase / decrease time warp |
 | `[` / `]` | Decrease / increase dt |
 | `r` | Reset simulation |
 | `?` | Help |
 | `q` / `Esc` | Quit |
+| Mouse click | Select nearest body |
+| Mouse drag | Pan |
+| Mouse wheel | Zoom at cursor |
 
 ## Commands
 

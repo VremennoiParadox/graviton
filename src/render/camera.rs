@@ -52,6 +52,17 @@ impl Camera {
         DVec2::new(sx, sy)
     }
 
+    /// Map terminal cell to world position in 3D for the active projection (m).
+    #[must_use]
+    pub fn screen_to_world_3d(&self, screen: DVec2, width: u16, height: u16) -> DVec3 {
+        let plane = self.screen_to_world(screen, width, height);
+        match self.projection {
+            Projection::Xy => DVec3::new(plane.x, plane.y, 0.0),
+            Projection::Xz => DVec3::new(plane.x, 0.0, plane.y),
+            Projection::Yz => DVec3::new(0.0, plane.x, plane.y),
+        }
+    }
+
     /// Map terminal cell coordinates to world (m) in the projected plane.
     #[must_use]
     pub fn screen_to_world(&self, screen: DVec2, width: u16, height: u16) -> DVec2 {

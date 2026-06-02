@@ -1,7 +1,5 @@
 //! Serde types for scenario TOML files.
 
-#![allow(dead_code)]
-
 use serde::Deserialize;
 
 pub const CURRENT_SCHEMA_VERSION: u32 = 1;
@@ -69,9 +67,21 @@ pub struct RenderSection {
     pub meters_per_cell: Option<f64>,
     pub trail_points: Option<u32>,
     pub follow_center_of_mass: Option<bool>,
+    pub heatmap_enabled: Option<bool>,
+    pub heatmap_sample_divisor: Option<u32>,
+    pub show_com_marker: Option<bool>,
+    #[serde(default)]
+    pub kitty: KittyRenderSection,
+}
+
+#[derive(Debug, Default, Deserialize)]
+pub struct KittyRenderSection {
+    pub enabled: Option<bool>,
+    pub mode: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)] // optional metadata used by fetch/validate and future phases
 pub struct BodySpec {
     pub id: String,
     pub name: String,

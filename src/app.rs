@@ -1,7 +1,8 @@
 //! Interactive application state and main loop.
 
+use std::collections::VecDeque;
 use std::io::{stdout, Stdout};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use crossterm::event::EnableMouseCapture;
@@ -22,10 +23,27 @@ use crate::physics::diagnostics::{compute, Diagnostics};
 use crate::physics::integrator::{Integrator, Rk4Integrator};
 use crate::physics::system::SystemState;
 use crate::render::camera::{Camera, Projection};
+use crate::render::heatmap::HeatmapCache;
 use crate::render::trails::Trail;
-use crate::scenario::{LoadedScenario, RenderConfig};
+use crate::scenario::{discover_scenarios, load, LoadedScenario, RenderConfig};
 use crate::time::clock::SimulationClock;
 use crate::time::scheduler::PhysicsScheduler;
+
+/// CLI flags that affect the interactive session.
+#[derive(Debug, Clone)]
+pub struct RunFlags {
+    pub no_heatmap: bool,
+    pub no_trails: bool,
+}
+
+/// Overlay preset cycled with `o`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum OverlayPreset {
+    Standard,
+    Science,
+    Minimal,
+    Full,
+}
 
 /// UI and simulation settings for rendering.
 #[derive(Debug, Clone)]
@@ -33,6 +51,31 @@ pub struct RenderSettings {
     pub trails_enabled: bool,
     pub trail_sample_every: u64,
     pub hud_visible: bool,
+    pub heatmap_enabled: bool,
+    pub heatmap_sample_divisor: u32,
+    pub show_com_marker: bool,
+    pub show_energy_diagnostics: bool,
+    pub show_momentum_diagnostics: bool,
+    pub overlay_preset: OverlayPreset,
+    pub kitty_enabled: bool,
+    pub kitty_mode: String,
+}
+
+/// Rolling energy drift samples for HUD sparkline.
+#[derive(Debug, Default)]
+pub struct EnergyHistory {
+    pub samples: VecDeque<f64>,
+}
+
+impl EnergyHistory {
+    const CAPACITY: usize = 40;
+
+    pub fn push(&mut self, drift_fraction: f64) {
+        if self.samples.len() >= Self::CAPACITY {
+            self.samples.pop_front();
+        }
+        self.samples.push_back(drift_fraction);
+    }
 }
 
 /// Top-level interactive application state.
@@ -47,15 +90,24 @@ pub struct App {
     pub selected_body: Option<usize>,
     pub render_settings: RenderSettings,
     pub trails: Vec<Trail>,
+    pub heatmap: HeatmapCache,
+    pub energy_history: EnergyHistory,
     pub scenario_path: PathBuf,
+    pub scenario_paths: Vec<PathBuf>,
+    pub scenario_menu_index: usize,
+    pub show_scenario_menu: bool,
     pub default_meters_per_cell: f64,
     pub follow_selected: bool,
     pub show_help: bool,
     pub should_quit: bool,
     pub fps: f64,
+    pub toast_message: Option<String>,
+    pub toast_until: Option<Instant>,
     physics_tick: u64,
     fps_timer: Instant,
     fps_frames: u32,
+    mouse_drag_anchor: Option<DVec2>,
+    run_flags: RunFlags,
 }
 
 impl App {
@@ -104,6 +156,16 @@ impl App {
             Some(0)
         };
 
+        let scenario_paths =
+            discover_scenarios(Path::new("scenarios")).unwrap_or_default();
+        let scenario_menu_index = scenario_paths
+            .iter()
+            .position(|p| p == &scenario_path)
+            .unwrap_or(0);
+
+        let overlay_preset = OverlayPreset::Standard;
+        let render_settings = build_render_settings(&render, args, overlay_preset);
+
         Ok(Self {
             system,
             snapshot,
@@ -113,22 +175,41 @@ impl App {
             clock: SimulationClock::new(),
             scheduler: PhysicsScheduler::new(),
             selected_body,
-            render_settings: RenderSettings {
-                trails_enabled: !args.no_trails,
-                trail_sample_every: render.trail_sample_every,
-                hud_visible: true,
-            },
+            render_settings,
             trails,
+            heatmap: HeatmapCache::default(),
+            energy_history: EnergyHistory::default(),
             scenario_path,
+            scenario_paths,
+            scenario_menu_index,
+            show_scenario_menu: false,
             default_meters_per_cell: render.meters_per_cell,
             follow_selected: false,
             show_help: false,
             should_quit: false,
             fps: 0.0,
+            toast_message: None,
+            toast_until: None,
             physics_tick: 0,
             fps_timer: Instant::now(),
             fps_frames: 0,
+            mouse_drag_anchor: None,
+            run_flags: RunFlags {
+                no_heatmap: args.no_heatmap,
+                no_trails: args.no_trails,
+            },
         })
+    }
+
+    pub fn simulation_title(&self) -> String {
+        let mut title = self.system.scenario_name.clone();
+        if self.render_settings.heatmap_enabled {
+            title.push_str(" | g: field");
+        }
+        if self.clock.paused {
+            title.push_str(" | paused");
+        }
+        title
     }
 
     pub fn run_interactive(
@@ -161,6 +242,8 @@ impl App {
         let tick_rate = Duration::from_millis(16);
 
         while !self.should_quit {
+            self.expire_toast();
+
             while event::poll(tick_rate)? {
                 self.handle_event(event::read()?, terminal)?;
             }
@@ -177,6 +260,10 @@ impl App {
             }
 
             self.current_diagnostics = compute(&self.system);
+            let drift = self
+                .current_diagnostics
+                .energy_drift_fraction(self.initial_diagnostics.total_energy_j);
+            self.energy_history.push(drift);
             self.update_fps();
 
             terminal.draw(|frame| crate::render::draw(frame, self))?;
@@ -190,6 +277,33 @@ impl App {
         event: Event,
         terminal: &mut Terminal<CrosstermBackend<Stdout>>,
     ) -> Result<()> {
+        if self.show_scenario_menu {
+            if let Event::Key(key) = &event {
+                if key.kind == KeyEventKind::Press {
+                    let cmd = map_key(*key);
+                    match cmd {
+                        AppCommand::Pan { dy: 1.0, .. } | AppCommand::SelectPrevious => {
+                            self.scenario_menu_up();
+                            return Ok(());
+                        }
+                        AppCommand::Pan { dy: -1.0, .. } | AppCommand::SelectNext => {
+                            self.scenario_menu_down();
+                            return Ok(());
+                        }
+                        AppCommand::ScenarioMenuConfirm => {
+                            self.confirm_scenario_menu()?;
+                            return Ok(());
+                        }
+                        AppCommand::Quit | AppCommand::ToggleHelp => {
+                            self.show_scenario_menu = false;
+                            return Ok(());
+                        }
+                        _ => {}
+                    }
+                }
+            }
+        }
+
         match event {
             Event::Key(key) if key.kind == KeyEventKind::Press => {
                 self.apply_command(map_key(key), terminal)?;
@@ -209,10 +323,33 @@ impl App {
         cmd: MouseCommand,
         terminal: &mut Terminal<CrosstermBackend<Stdout>>,
     ) -> Result<()> {
+        if self.show_scenario_menu {
+            return Ok(());
+        }
+
         let sim_area = simulation_rect(terminal, self.render_settings.hud_visible)?;
         match cmd {
             MouseCommand::SelectAt { col, row } => {
+                self.mouse_drag_anchor = None;
                 self.select_at_terminal_cell(col, row, sim_area);
+            }
+            MouseCommand::DragTo { col, row } => {
+                let local_x = col.saturating_sub(sim_area.x);
+                let local_y = row.saturating_sub(sim_area.y);
+                let screen = DVec2::new(f64::from(local_x), f64::from(local_y));
+                if let Some(anchor) = self.mouse_drag_anchor {
+                    let delta = screen - anchor;
+                    if delta.length_squared() > 0.25 {
+                        self.camera.pan_cells(-delta.x, -delta.y);
+                        self.heatmap.invalidate();
+                        self.mouse_drag_anchor = Some(screen);
+                    }
+                } else {
+                    self.mouse_drag_anchor = Some(screen);
+                }
+            }
+            MouseCommand::DragEnd => {
+                self.mouse_drag_anchor = None;
             }
             MouseCommand::ZoomAt { col, row, zoom_in } => {
                 let local_x = col.saturating_sub(sim_area.x);
@@ -220,9 +357,7 @@ impl App {
                 let anchor = DVec2::new(f64::from(local_x), f64::from(local_y));
                 self.camera
                     .zoom_at_screen(anchor, sim_area.width, sim_area.height, zoom_in);
-            }
-            MouseCommand::PanBy { dx, dy } => {
-                self.camera.pan_cells(dx, dy);
+                self.heatmap.invalidate();
             }
         }
         Ok(())
@@ -238,27 +373,43 @@ impl App {
             AppCommand::TogglePause => self.clock.toggle_pause(),
             AppCommand::ToggleHelp => self.show_help = !self.show_help,
             AppCommand::ResetSimulation => self.reset_simulation(),
+            AppCommand::ReloadScenario => self.reload_scenario_from_disk()?,
             AppCommand::ZoomIn => {
                 let sim = simulation_rect(terminal, self.render_settings.hud_visible)?;
                 let center = DVec2::new(f64::from(sim.width) / 2.0, f64::from(sim.height) / 2.0);
                 self.camera
                     .zoom_at_screen(center, sim.width, sim.height, true);
+                self.heatmap.invalidate();
             }
             AppCommand::ZoomOut => {
                 let sim = simulation_rect(terminal, self.render_settings.hud_visible)?;
                 let center = DVec2::new(f64::from(sim.width) / 2.0, f64::from(sim.height) / 2.0);
                 self.camera
                     .zoom_at_screen(center, sim.width, sim.height, false);
+                self.heatmap.invalidate();
             }
             AppCommand::ResetZoom => {
                 self.camera.meters_per_cell = self.default_meters_per_cell;
+                self.heatmap.invalidate();
             }
-            AppCommand::Pan { dx, dy } => self.camera.pan_cells(dx, dy),
+            AppCommand::Pan { dx, dy } => {
+                self.camera.pan_cells(dx, dy);
+                self.heatmap.invalidate();
+            }
             AppCommand::FollowSelected => self.follow_selected = !self.follow_selected,
             AppCommand::FrameAll => self.frame_all_bodies(),
-            AppCommand::ProjectionXy => self.camera.projection = Projection::Xy,
-            AppCommand::ProjectionXz => self.camera.projection = Projection::Xz,
-            AppCommand::ProjectionYz => self.camera.projection = Projection::Yz,
+            AppCommand::ProjectionXy => {
+                self.camera.projection = Projection::Xy;
+                self.heatmap.invalidate();
+            }
+            AppCommand::ProjectionXz => {
+                self.camera.projection = Projection::Xz;
+                self.heatmap.invalidate();
+            }
+            AppCommand::ProjectionYz => {
+                self.camera.projection = Projection::Yz;
+                self.heatmap.invalidate();
+            }
             AppCommand::SelectNext => self.cycle_selection(1),
             AppCommand::SelectPrevious => self.cycle_selection(-1),
             AppCommand::ToggleTrails => {
@@ -267,6 +418,30 @@ impl App {
             AppCommand::ToggleHud => {
                 self.render_settings.hud_visible = !self.render_settings.hud_visible;
             }
+            AppCommand::ToggleHeatmap => {
+                self.render_settings.heatmap_enabled = !self.render_settings.heatmap_enabled;
+                self.heatmap.invalidate();
+            }
+            AppCommand::ToggleEnergyDiagnostics => {
+                self.render_settings.show_energy_diagnostics =
+                    !self.render_settings.show_energy_diagnostics;
+            }
+            AppCommand::ToggleMomentumDiagnostics => {
+                self.render_settings.show_momentum_diagnostics =
+                    !self.render_settings.show_momentum_diagnostics;
+            }
+            AppCommand::ToggleComMarker => {
+                self.render_settings.show_com_marker = !self.render_settings.show_com_marker;
+            }
+            AppCommand::CycleOverlayPreset => self.cycle_overlay_preset(),
+            AppCommand::OpenScenarioMenu => {
+                self.show_scenario_menu = true;
+                if self.scenario_paths.is_empty() {
+                    self.scenario_paths =
+                        discover_scenarios(Path::new("scenarios")).unwrap_or_default();
+                }
+            }
+            AppCommand::ValidateScenario => self.validate_current_scenario(),
             AppCommand::IncreaseTimeWarp => self.clock.increase_warp(),
             AppCommand::DecreaseTimeWarp => self.clock.decrease_warp(),
             AppCommand::IncreaseDt => {
@@ -274,6 +449,11 @@ impl App {
             }
             AppCommand::DecreaseDt => {
                 self.system.settings.dt_s = (self.system.settings.dt_s / 1.25).max(1.0);
+            }
+            AppCommand::ScenarioMenuConfirm => {
+                if self.show_scenario_menu {
+                    self.confirm_scenario_menu()?;
+                }
             }
             AppCommand::None => {}
         }
@@ -286,6 +466,135 @@ impl App {
         }
 
         Ok(())
+    }
+
+    fn cycle_overlay_preset(&mut self) {
+        self.render_settings.overlay_preset = match self.render_settings.overlay_preset {
+            OverlayPreset::Standard => OverlayPreset::Science,
+            OverlayPreset::Science => OverlayPreset::Minimal,
+            OverlayPreset::Minimal => OverlayPreset::Full,
+            OverlayPreset::Full => OverlayPreset::Standard,
+        };
+        apply_overlay_preset(&mut self.render_settings);
+        self.heatmap.invalidate();
+    }
+
+    fn validate_current_scenario(&mut self) {
+        match load(&self.scenario_path) {
+            Ok(loaded) => {
+                let n = loaded.system.bodies.len();
+                self.show_toast(format!(
+                    "ok: {} ({n} bodies)",
+                    self.scenario_path.display()
+                ));
+            }
+            Err(e) => self.show_toast(format!("validate failed: {e}")),
+        }
+    }
+
+    fn reload_scenario_from_disk(&mut self) -> Result<()> {
+        let path = self.scenario_path.clone();
+        let loaded = load(&path)?;
+        let render = loaded.render.clone();
+        let overlay = self.render_settings.overlay_preset;
+        let trails_on = self.render_settings.trails_enabled;
+        let hud_on = self.render_settings.hud_visible;
+        let heatmap_on = self.render_settings.heatmap_enabled && !self.run_flags.no_heatmap;
+
+        let mut fresh = Self::from_loaded(
+            loaded,
+            path,
+            &RunArgs {
+                scenario: self.scenario_path.clone(),
+                headless: false,
+                steps: 0,
+                dt: Some(self.system.settings.dt_s),
+                integrator: crate::cli::IntegratorArg::Rk4,
+                barnes_hut: false,
+                theta: 0.7,
+                no_heatmap: self.run_flags.no_heatmap,
+                no_trails: self.run_flags.no_trails,
+            },
+            render,
+        )?;
+
+        fresh.render_settings.overlay_preset = overlay;
+        fresh.render_settings.trails_enabled = trails_on;
+        fresh.render_settings.hud_visible = hud_on;
+        fresh.render_settings.heatmap_enabled = heatmap_on;
+        apply_overlay_preset(&mut fresh.render_settings);
+        fresh.clock.time_warp = self.clock.time_warp;
+        fresh.show_help = self.show_help;
+
+        *self = fresh;
+        self.show_toast("scenario reloaded".into());
+        Ok(())
+    }
+
+    fn confirm_scenario_menu(&mut self) -> Result<()> {
+        let Some(path) = self.scenario_paths.get(self.scenario_menu_index).cloned() else {
+            self.show_scenario_menu = false;
+            return Ok(());
+        };
+        self.show_scenario_menu = false;
+        let loaded = load(&path)?;
+        let render = loaded.render.clone();
+        let warp = self.clock.time_warp;
+        let overlay = self.render_settings.overlay_preset;
+
+        let mut fresh = Self::from_loaded(
+            loaded,
+            path,
+            &RunArgs {
+                scenario: self.scenario_path.clone(),
+                headless: false,
+                steps: 0,
+                dt: None,
+                integrator: crate::cli::IntegratorArg::Rk4,
+                barnes_hut: false,
+                theta: 0.7,
+                no_heatmap: self.run_flags.no_heatmap,
+                no_trails: self.run_flags.no_trails,
+            },
+            render,
+        )?;
+        fresh.render_settings.overlay_preset = overlay;
+        apply_overlay_preset(&mut fresh.render_settings);
+        fresh.clock.time_warp = warp;
+        *self = fresh;
+        Ok(())
+    }
+
+    fn scenario_menu_up(&mut self) {
+        if self.scenario_paths.is_empty() {
+            return;
+        }
+        if self.scenario_menu_index == 0 {
+            self.scenario_menu_index = self.scenario_paths.len() - 1;
+        } else {
+            self.scenario_menu_index -= 1;
+        }
+    }
+
+    fn scenario_menu_down(&mut self) {
+        if self.scenario_paths.is_empty() {
+            return;
+        }
+        self.scenario_menu_index = (self.scenario_menu_index + 1) % self.scenario_paths.len();
+    }
+
+    fn show_toast(&mut self, message: String) {
+        self.toast_message = Some(message);
+        self.toast_until = Some(Instant::now() + Duration::from_secs(3));
+    }
+
+    fn expire_toast(&mut self) {
+        if let Some(until) = self.toast_until {
+            if Instant::now() >= until {
+                self.toast_message = None;
+                self.toast_until = None;
+            }
+        }
     }
 
     fn record_trails(&mut self) {
@@ -306,6 +615,7 @@ impl App {
         }
         self.current_diagnostics = compute(&self.system);
         self.scheduler = PhysicsScheduler::new();
+        self.heatmap.invalidate();
     }
 
     fn cycle_selection(&mut self, delta: isize) {
@@ -327,6 +637,7 @@ impl App {
             .map(|b| self.camera.project(b.position_m))
             .collect();
         self.camera.frame_positions(&projected, 80, 24);
+        self.heatmap.invalidate();
     }
 
     fn select_at_terminal_cell(&mut self, col: u16, row: u16, area: ratatui::layout::Rect) {
@@ -366,6 +677,56 @@ impl App {
             self.fps = self.fps_frames as f64 / elapsed.as_secs_f64();
             self.fps_frames = 0;
             self.fps_timer = Instant::now();
+        }
+    }
+}
+
+fn build_render_settings(
+    render: &RenderConfig,
+    args: &RunArgs,
+    overlay_preset: OverlayPreset,
+) -> RenderSettings {
+    let mut settings = RenderSettings {
+        trails_enabled: !args.no_trails,
+        trail_sample_every: render.trail_sample_every,
+        hud_visible: true,
+        heatmap_enabled: render.heatmap_enabled && !args.no_heatmap,
+        heatmap_sample_divisor: render.heatmap_sample_divisor,
+        show_com_marker: render.show_com_marker,
+        show_energy_diagnostics: true,
+        show_momentum_diagnostics: false,
+        overlay_preset,
+        kitty_enabled: render.kitty_enabled,
+        kitty_mode: render.kitty_mode.clone(),
+    };
+    apply_overlay_preset(&mut settings);
+    settings
+}
+
+fn apply_overlay_preset(settings: &mut RenderSettings) {
+    match settings.overlay_preset {
+        OverlayPreset::Standard => {
+            settings.show_com_marker = false;
+            settings.show_energy_diagnostics = true;
+            settings.show_momentum_diagnostics = false;
+        }
+        OverlayPreset::Science => {
+            settings.heatmap_enabled = true;
+            settings.show_com_marker = true;
+            settings.show_energy_diagnostics = true;
+            settings.show_momentum_diagnostics = true;
+        }
+        OverlayPreset::Minimal => {
+            settings.heatmap_enabled = false;
+            settings.show_com_marker = false;
+            settings.show_energy_diagnostics = false;
+            settings.show_momentum_diagnostics = false;
+        }
+        OverlayPreset::Full => {
+            settings.heatmap_enabled = true;
+            settings.show_com_marker = true;
+            settings.show_energy_diagnostics = true;
+            settings.show_momentum_diagnostics = true;
         }
     }
 }

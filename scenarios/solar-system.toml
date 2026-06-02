@@ -1,0 +1,149 @@
+schema_version = 1
+name = "Solar System (HORIZONS)"
+description = "Barycentric state vectors from NASA JPL HORIZONS (2026-06-01, center 500@0)."
+author = "graviton (graviton fetch)"
+
+[units]
+distance = "au"
+mass = "kg"
+time = "day"
+
+[physics]
+integrator = "rk4"
+dt = 3600.0
+dt_unit = "s"
+softening_m = 1000000.0
+
+[render]
+meters_per_cell = 5000000000.0
+trail_points = 2048
+follow_center_of_mass = true
+heatmap_enabled = true
+heatmap_sample_divisor = 2
+show_com_marker = false
+
+[render.kitty]
+enabled = false
+mode = "density-panel"
+
+[[bodies]]
+id = "sun"
+name = "Sun"
+class = "star"
+mass = 1.988920000000e30
+radius = 6.963400e8
+position = [-0.002016112329510088, -0.005395204274881183, 0.00011066032138437136]
+velocity = [0.000006641213335920495, 0.0000016564332832247562, -0.00000013658081872042293]
+color = "#fff4ea"
+horizons_id = "10"
+
+[[bodies]]
+id = "mercury"
+name = "Mercury"
+class = "planet"
+mass = 3.301100000000e23
+radius = 2.439700e6
+position = [-0.3226673523354186, 0.1417182763124623, 0.041542531693592455]
+velocity = [-0.017517863400375623, -0.024379074124450013, -0.00038531328115291814]
+color = "#8c7f70"
+horizons_id = "199"
+
+[[bodies]]
+id = "venus"
+name = "Venus"
+class = "planet"
+mass = 4.867500000000e24
+radius = 6.051800e6
+position = [-0.6715140795275444, 0.2532596680634341, 0.04229379103449629]
+velocity = [-0.007376368898279214, -0.018959615196089945, 0.0001653517979754779]
+color = "#d9c27f"
+horizons_id = "299"
+
+[[bodies]]
+id = "earth"
+name = "Earth"
+class = "planet"
+mass = 5.972190000000e24
+radius = 6.371000e6
+position = [-0.3459171236955963, -0.9591730984194944, 0.00017263124057361398]
+velocity = [0.015905391194409122, -0.005896697482130968, -0.000000013580318224933098]
+color = "#3d8bfd"
+horizons_id = "399"
+
+[[bodies]]
+id = "moon"
+name = "Moon"
+class = "moon"
+mass = 7.342000000000e22
+radius = 1.737400e6
+position = [-0.3465214344864297, -0.9618113728627563, -0.000056792501150705754]
+velocity = [0.01645177189844835, -0.006023753415458854, 0.000011577572884754495]
+color = "#c0c0c0"
+horizons_id = "301"
+
+[[bodies]]
+id = "mars"
+name = "Mars"
+class = "planet"
+mass = 6.417100000000e23
+radius = 3.389500e6
+position = [1.3417884251397068, 0.4270091731597307, -0.02377867023895801]
+velocity = [-0.0037429468630511956, 0.014518728875153488, 0.0003960353168284466]
+color = "#c1440e"
+horizons_id = "499"
+
+[[bodies]]
+id = "jupiter"
+name = "Jupiter"
+class = "planet"
+mass = 1.898200000000e27
+radius = 6.991100e7
+position = [-2.73949298062543, 4.492736495817841, 0.04267257164705344]
+velocity = [-0.006531868239572712, -0.003572477741034866, 0.00016103007502457138]
+color = "#d8a45f"
+horizons_id = "599"
+
+[[bodies]]
+id = "saturn"
+name = "Saturn"
+class = "planet"
+mass = 5.683400000000e26
+radius = 5.823200e7
+position = [9.3981585085662, 1.090388650567408, -0.3931552783567297]
+velocity = [-0.0009495431496048945, 0.005530088221104943, -0.000058661732355750005]
+color = "#e3c16f"
+horizons_id = "699"
+
+[[bodies]]
+id = "uranus"
+name = "Uranus"
+class = "planet"
+mass = 8.681000000000e25
+radius = 2.536200e7
+position = [9.356503564697864, 17.060153934641768, -0.057855213568224484]
+velocity = [-0.0034774603221792754, 0.001707980249888164, 0.00005143282795432609]
+color = "#7fdbff"
+horizons_id = "799"
+
+[[bodies]]
+id = "neptune"
+name = "Neptune"
+class = "planet"
+mass = 1.024130000000e26
+radius = 2.462200e7
+position = [29.85400371168942, 0.9900713943461937, -0.7084044548076205]
+velocity = [-0.00012425256349736836, 0.0031562139228144374, -0.00006232232293652079]
+color = "#4169e1"
+horizons_id = "899"
+
+[[bodies]]
+id = "pluto"
+name = "Pluto"
+class = "dwarf_planet"
+mass = 1.303000000000e22
+radius = 1.188300e6
+position = [19.634313672317205, -29.50330593016843, -2.52239079186282]
+velocity = [0.0026916731637465457, 0.0010314623495671737, -0.0008864919199049247]
+color = "#b89b72"
+horizons_id = "999"
+

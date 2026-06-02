@@ -9,6 +9,7 @@ pub enum AppCommand {
     TogglePause,
     ToggleHelp,
     ResetSimulation,
+    ReloadScenario,
     ZoomIn,
     ZoomOut,
     ResetZoom,
@@ -22,6 +23,14 @@ pub enum AppCommand {
     SelectPrevious,
     ToggleTrails,
     ToggleHud,
+    ToggleHeatmap,
+    ToggleEnergyDiagnostics,
+    ToggleMomentumDiagnostics,
+    ToggleComMarker,
+    CycleOverlayPreset,
+    OpenScenarioMenu,
+    ValidateScenario,
+    ScenarioMenuConfirm,
     IncreaseTimeWarp,
     DecreaseTimeWarp,
     IncreaseDt,
@@ -31,6 +40,11 @@ pub enum AppCommand {
 
 pub fn map_key(event: KeyEvent) -> AppCommand {
     match event.code {
+        KeyCode::Char('r') | KeyCode::Char('R')
+            if event.modifiers.contains(KeyModifiers::SHIFT) =>
+        {
+            AppCommand::ReloadScenario
+        }
         KeyCode::Char('q') | KeyCode::Esc => AppCommand::Quit,
         KeyCode::Char('?') => AppCommand::ToggleHelp,
         KeyCode::Char(' ') => AppCommand::TogglePause,
@@ -45,22 +59,38 @@ pub fn map_key(event: KeyEvent) -> AppCommand {
         KeyCode::Char('3') => AppCommand::ProjectionYz,
         KeyCode::Char('t') | KeyCode::Char('T') => AppCommand::ToggleTrails,
         KeyCode::Char('H') => AppCommand::ToggleHud,
+        KeyCode::Char('g') => AppCommand::ToggleHeatmap,
+        KeyCode::Char('e') => AppCommand::ToggleEnergyDiagnostics,
+        KeyCode::Char('p') => AppCommand::ToggleMomentumDiagnostics,
+        KeyCode::Char('c') => AppCommand::ToggleComMarker,
+        KeyCode::Char('o') => AppCommand::CycleOverlayPreset,
+        KeyCode::Char('s') => AppCommand::OpenScenarioMenu,
+        KeyCode::Char('v') => AppCommand::ValidateScenario,
         KeyCode::Char('.') => AppCommand::IncreaseTimeWarp,
         KeyCode::Char(',') => AppCommand::DecreaseTimeWarp,
         KeyCode::Char(']') => AppCommand::IncreaseDt,
         KeyCode::Char('[') => AppCommand::DecreaseDt,
-        KeyCode::Up | KeyCode::Char('k') => AppCommand::Pan { dx: 0.0, dy: 1.0 },
-        KeyCode::Down | KeyCode::Char('j') => AppCommand::Pan { dx: 0.0, dy: -1.0 },
-        KeyCode::Left | KeyCode::Char('h') => AppCommand::Pan { dx: -1.0, dy: 0.0 },
-        KeyCode::Right | KeyCode::Char('l') => AppCommand::Pan { dx: 1.0, dy: 0.0 },
-        KeyCode::Tab => {
-            if event.modifiers.contains(KeyModifiers::SHIFT) {
-                AppCommand::SelectPrevious
-            } else {
-                AppCommand::SelectNext
-            }
+        KeyCode::Up | KeyCode::Char('k') => AppCommand::Pan {
+            dx: 0.0,
+            dy: 1.0,
+        },
+        KeyCode::Down | KeyCode::Char('j') => AppCommand::Pan {
+            dx: 0.0,
+            dy: -1.0,
+        },
+        KeyCode::Left | KeyCode::Char('h') => AppCommand::Pan {
+            dx: -1.0,
+            dy: 0.0,
+        },
+        KeyCode::Right | KeyCode::Char('l') => AppCommand::Pan {
+            dx: 1.0,
+            dy: 0.0,
+        },
+        KeyCode::Tab if event.modifiers.contains(KeyModifiers::SHIFT) => {
+            AppCommand::SelectPrevious
         }
-        KeyCode::BackTab => AppCommand::SelectPrevious,
+        KeyCode::Enter => AppCommand::ScenarioMenuConfirm,
+        KeyCode::Tab | KeyCode::BackTab => AppCommand::SelectNext,
         _ => AppCommand::None,
     }
 }

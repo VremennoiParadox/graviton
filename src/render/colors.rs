@@ -76,6 +76,78 @@ fn color_by_class(class: BodyClass) -> [u8; 3] {
     }
 }
 
+/// Log₁₀(|g| + floor) for heatmap scaling (m/s² input).
+#[must_use]
+pub fn log_field_intensity(field_magnitude_mps2: f64) -> f64 {
+    const FLOOR: f64 = 1e-8;
+    (field_magnitude_mps2 + FLOOR).log10()
+}
+
+/// Heatmap color: dark blue → violet → orange → yellow-white.
+#[must_use]
+pub fn heatmap_color(log_intensity: f64) -> [u8; 3] {
+    // Typical range ~ -8 (weak) to 0+ (strong); clamp for palette.
+    let t = ((log_intensity + 8.0) / 10.0).clamp(0.0, 1.0);
+    if t < 0.33 {
+        let u = t / 0.33;
+        lerp_rgb(hex("0a0e2a"), hex("4a2c7a"), u)
+    } else if t < 0.66 {
+        let u = (t - 0.33) / 0.33;
+        lerp_rgb(hex("4a2c7a"), hex("e67e22"), u)
+    } else {
+        let u = (t - 0.66) / 0.34;
+        lerp_rgb(hex("e67e22"), hex("fff8dc"), u)
+    }
+}
+
+/// Block character for heatmap intensity tier.
+#[must_use]
+pub fn heatmap_char(log_intensity: f64) -> char {
+    let t = ((log_intensity + 8.0) / 10.0).clamp(0.0, 1.0);
+    if t < 0.05 {
+        ' '
+    } else if t < 0.35 {
+        '░'
+    } else if t < 0.65 {
+        '▒'
+    } else if t < 0.85 {
+        '▓'
+    } else {
+        '█'
+    }
+}
+
+/// Dim warm halo around stars.
+#[must_use]
+pub fn star_glow_color(base: [u8; 3]) -> [u8; 3] {
+    [
+        (f64::from(base[0]) * 0.55) as u8,
+        (f64::from(base[1]) * 0.45) as u8,
+        (f64::from(base[2]) * 0.25) as u8,
+    ]
+}
+
+/// Selection ring / marker accent.
+#[must_use]
+pub const fn selection_accent() -> [u8; 3] {
+    [0xff, 0xff, 0x66]
+}
+
+/// Center-of-mass marker.
+#[must_use]
+pub const fn com_marker_color() -> [u8; 3] {
+    [0x66, 0xff, 0xaa]
+}
+
+fn lerp_rgb(a: [u8; 3], b: [u8; 3], t: f64) -> [u8; 3] {
+    let t = t.clamp(0.0, 1.0);
+    [
+        (f64::from(a[0]) + (f64::from(b[0]) - f64::from(a[0])) * t) as u8,
+        (f64::from(a[1]) + (f64::from(b[1]) - f64::from(a[1])) * t) as u8,
+        (f64::from(a[2]) + (f64::from(b[2]) - f64::from(a[2])) * t) as u8,
+    ]
+}
+
 /// Fade trail brightness by age (0 = oldest, 1 = newest).
 #[must_use]
 pub fn trail_color(base: [u8; 3], age_fraction: f64) -> [u8; 3] {
@@ -117,5 +189,13 @@ mod tests {
     #[test]
     fn parses_hex_color() {
         assert_eq!(parse_hex_color("#3d8bfd"), Some([0x3d, 0x8b, 0xfd]));
+    }
+
+    #[test]
+    fn heatmap_char_increases_with_intensity() {
+        let weak = heatmap_char(-10.0);
+        let strong = heatmap_char(0.0);
+        assert_eq!(weak, ' ');
+        assert_ne!(weak, strong);
     }
 }

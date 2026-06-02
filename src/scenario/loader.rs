@@ -21,15 +21,19 @@ pub struct RenderConfig {
     pub trail_capacity: usize,
     pub trail_sample_every: u64,
     pub follow_center_of_mass: bool,
+    pub heatmap_enabled: bool,
+    pub heatmap_sample_divisor: u32,
+    pub show_com_marker: bool,
+    pub kitty_enabled: bool,
+    pub kitty_mode: String,
 }
 
 /// Loaded scenario with simulation state and metadata.
+#[allow(dead_code)] // description/author surfaced in HUD in a later phase
 pub struct LoadedScenario {
     pub system: SystemState,
     pub render: RenderConfig,
-    #[allow(dead_code)]
     pub description: Option<String>,
-    #[allow(dead_code)]
     pub author: Option<String>,
 }
 
@@ -66,6 +70,16 @@ pub fn load(path: &Path) -> Result<LoadedScenario> {
         trail_capacity: raw.render.trail_points.unwrap_or(1024) as usize,
         trail_sample_every: 4,
         follow_center_of_mass: raw.render.follow_center_of_mass.unwrap_or(false),
+        heatmap_enabled: raw.render.heatmap_enabled.unwrap_or(true),
+        heatmap_sample_divisor: raw.render.heatmap_sample_divisor.unwrap_or(2),
+        show_com_marker: raw.render.show_com_marker.unwrap_or(false),
+        kitty_enabled: raw.render.kitty.enabled.unwrap_or(false),
+        kitty_mode: raw
+            .render
+            .kitty
+            .mode
+            .clone()
+            .unwrap_or_else(|| "density-panel".into()),
     };
 
     let dt_s = dt_seconds(&raw, time_scale)?;

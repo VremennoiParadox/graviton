@@ -1,9 +1,9 @@
 //! NASA JPL HORIZONS API client, parser, cache, and body ID mappings.
 
-#![allow(dead_code)]
+pub mod cache;
+pub mod client;
+pub mod fetch;
+pub mod ids;
+pub mod parser;
 
-// Phase 3+
-// pub mod cache;
-// pub mod client;
-// pub mod ids;
-// pub mod parser;
+pub use fetch::{run_fetch, FetchOptions};

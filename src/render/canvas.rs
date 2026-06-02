@@ -5,7 +5,7 @@ use ratatui::style::{Color, Style};
 use ratatui::text::Span;
 
 use crate::render::camera::Camera;
-use crate::render::colors::{body_color, trail_color};
+use crate::render::colors::{body_color, com_marker_color, selection_accent, star_glow_color, trail_color};
 
 /// One drawable cell in the simulation view.
 #[derive(Debug, Clone)]
@@ -73,6 +73,59 @@ impl SimulationCanvas {
         }
     }
 
+    pub fn plot_heatmap_cell(&mut self, x: u16, y: u16, ch: char, rgb: [u8; 3]) {
+        if ch == ' ' {
+            return;
+        }
+        self.put_screen(x, y, ch, rgb, 0);
+    }
+
+    pub fn plot_star_glow(&mut self, camera: &Camera, world: DVec2, base_rgb: [u8; 3]) {
+        let glow = star_glow_color(base_rgb);
+        let screen = camera.world_to_screen(world, self.width, self.height);
+        let cx = screen.x.round() as i32;
+        let cy = screen.y.round() as i32;
+        for (dx, dy) in [
+            (-1, 0),
+            (1, 0),
+            (0, -1),
+            (0, 1),
+            (-1, -1),
+            (1, -1),
+            (-1, 1),
+            (1, 1),
+        ] {
+            let x = cx + dx;
+            let y = cy + dy;
+            if x >= 0 && y >= 0 && x < i32::from(self.width) && y < i32::from(self.height) {
+                self.put_screen(x as u16, y as u16, '·', glow, 2);
+            }
+        }
+    }
+
+    pub fn plot_selection_marker(&mut self, camera: &Camera, world: DVec2) {
+        let accent = selection_accent();
+        let screen = camera.world_to_screen(world, self.width, self.height);
+        let cx = screen.x.round() as i32;
+        let cy = screen.y.round() as i32;
+        for (dx, dy, ch) in [
+            (0, -2, '┴'),
+            (0, 2, '┬'),
+            (-2, 0, '┤'),
+            (2, 0, '├'),
+        ] {
+            let x = cx + dx;
+            let y = cy + dy;
+            if x >= 0 && y >= 0 && x < i32::from(self.width) && y < i32::from(self.height) {
+                self.put_screen(x as u16, y as u16, ch, accent, 8);
+            }
+        }
+    }
+
+    pub fn plot_com_marker(&mut self, camera: &Camera, world: DVec2) {
+        self.plot_world(camera, world, '╋', com_marker_color(), 7);
+    }
+
     pub fn plot_body(
         &mut self,
         camera: &Camera,
@@ -81,6 +134,9 @@ impl SimulationCanvas {
         selected: bool,
     ) {
         let rgb = body_color(body);
+        if matches!(body.class, crate::physics::body::BodyClass::Star) {
+            self.plot_star_glow(camera, world, rgb);
+        }
         let ch = if selected {
             '█'
         } else if matches!(body.class, crate::physics::body::BodyClass::Star) {
@@ -90,6 +146,9 @@ impl SimulationCanvas {
         };
         let priority = if selected { 10 } else { 5 };
         self.plot_world(camera, world, ch, rgb, priority);
+        if selected {
+            self.plot_selection_marker(camera, world);
+        }
     }
 
     fn plot_world(&mut self, camera: &Camera, world: DVec2, ch: char, rgb: [u8; 3], priority: u8) {
@@ -99,7 +158,11 @@ impl SimulationCanvas {
         if x < 0 || y < 0 || x >= i32::from(self.width) || y >= i32::from(self.height) {
             return;
         }
-        let idx = usize::from(y as u16) * usize::from(self.width) + usize::from(x as u16);
+        self.put_screen(x as u16, y as u16, ch, rgb, priority);
+    }
+
+    fn put_screen(&mut self, x: u16, y: u16, ch: char, rgb: [u8; 3], priority: u8) {
+        let idx = usize::from(y) * usize::from(self.width) + usize::from(x);
         let fg = Color::Rgb(rgb[0], rgb[1], rgb[2]);
         match &self.cells[idx] {
             None => self.cells[idx] = Some(Cell { ch, fg, priority }),
