@@ -1,0 +1,18 @@
+/target/
+**/*.rs.bk
+*.pdb
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# HORIZONS cache (user-local; optional project cache during dev)
+.cache/
+
+# Snapshot test artifacts
+**/snapshots/*.new
+
+# Demo assets (generated)
+/assets/demo.cast

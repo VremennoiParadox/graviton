@@ -1,0 +1,53 @@
+schema_version = 1
+name = "Figure-8 Three-Body"
+description = "A classic equal-mass three-body periodic orbit."
+author = "graviton"
+
+[units]
+distance = "custom"
+distance_scale_m = 1.0e9
+mass = "custom"
+mass_scale_kg = 1.0e24
+time = "custom"
+time_scale_s = 86400.0
+
+[physics]
+integrator = "rk4"
+dt = 0.001
+dt_unit = "time"
+softening_m = 1000.0
+
+[render]
+meters_per_cell = 2.0e7
+trail_points = 4096
+follow_center_of_mass = true
+
+[[bodies]]
+id = "body-a"
+name = "A"
+class = "custom"
+mass = 1.0
+radius = 0.02
+position = [-0.97000436, 0.24308753, 0.0]
+velocity = [0.4662036850, 0.4323657300, 0.0]
+color = "#ff6b6b"
+
+[[bodies]]
+id = "body-b"
+name = "B"
+class = "custom"
+mass = 1.0
+radius = 0.02
+position = [0.97000436, -0.24308753, 0.0]
+velocity = [0.4662036850, 0.4323657300, 0.0]
+color = "#4dabf7"
+
+[[bodies]]
+id = "body-c"
+name = "C"
+class = "custom"
+mass = 1.0
+radius = 0.02
+position = [0.0, 0.0, 0.0]
+velocity = [-0.93240737, -0.86473146, 0.0]
+color = "#51cf66"

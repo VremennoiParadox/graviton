@@ -1,0 +1,65 @@
+//! graviton — terminal N-body gravitational simulator.
+
+mod app;
+mod cli;
+mod error;
+mod horizons;
+mod input;
+mod physics;
+mod render;
+mod scenario;
+mod simulation;
+mod time;
+
+use anyhow::Context;
+use clap::Parser;
+
+fn main() -> anyhow::Result<()> {
+    let cli = cli::Cli::parse();
+    cli::run(cli).context("graviton failed")
+}
+
+#[cfg(test)]
+mod tests {
+    use clap::Parser;
+
+    use crate::cli::{Cli, Commands};
+
+    #[test]
+    fn cli_parses_without_subcommand_errors() {
+        let cli = Cli::try_parse_from(["graviton", "list-scenarios"]).unwrap();
+        assert!(matches!(cli.command, Commands::ListScenarios));
+    }
+
+    #[test]
+    fn run_subcommand_parses_flags() {
+        let cli = Cli::try_parse_from([
+            "graviton",
+            "run",
+            "scenarios/earth-moon.toml",
+            "--headless",
+            "--steps",
+            "500",
+        ])
+        .unwrap();
+        match cli.command {
+            Commands::Run(args) => {
+                assert!(args.headless);
+                assert_eq!(args.steps, 500);
+                assert_eq!(
+                    args.scenario,
+                    std::path::Path::new("scenarios/earth-moon.toml")
+                );
+            }
+            _ => panic!("expected Run subcommand"),
+        }
+    }
+
+    #[test]
+    fn fetch_subcommand_parses_date() {
+        let cli =
+            Cli::try_parse_from(["graviton", "fetch", "solar-system", "--date", "2026-06-01"])
+                .unwrap();
+        assert!(matches!(cli.command, Commands::Fetch(_)));
+    }
+}

@@ -1,0 +1,38 @@
+schema_version = 1
+name = "Earth-Moon"
+description = "Earth and Moon with mutual circular-orbit initial conditions (SI units)."
+author = "graviton"
+
+[units]
+distance = "m"
+mass = "kg"
+time = "s"
+
+[physics]
+integrator = "rk4"
+dt = 300.0
+softening_m = 1000.0
+
+[render]
+meters_per_cell = 10000000.0
+trail_points = 1024
+
+[[bodies]]
+id = "earth"
+name = "Earth"
+class = "planet"
+mass = 5.97219e24
+radius = 6371000.0
+position = [0.0, 0.0, 0.0]
+velocity = [0.0, -12.44, 0.0]
+color = "#3d8bfd"
+
+[[bodies]]
+id = "moon"
+name = "Moon"
+class = "moon"
+mass = 7.342e22
+radius = 1737400.0
+position = [384400000.0, 0.0, 0.0]
+velocity = [0.0, 1011.0, 0.0]
+color = "#c0c0c0"
